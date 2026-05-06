@@ -14,6 +14,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     return ValueListenableBuilder(
       valueListenable: Hive.box('users_box').listenable(),
       builder: (context, Box settingsBox, _) {
@@ -36,7 +37,8 @@ class HomePage extends StatelessWidget {
                     SizedBox(height: 15),
                     Text(
                       "Setting up your dashboard...",
-                      style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                          color: Colors.grey, fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),
@@ -72,9 +74,7 @@ class HomePage extends StatelessWidget {
                             }
 
                             return Column(
-                              children: medications.map((medication) {
-                                return MedCard(med: medication);
-                              }).toList(),
+children: medications.map((m) => MedCard(med: m)).toList(),
                             );
                           },
                         ),
@@ -138,7 +138,7 @@ class HomePage extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           const Text(
-            "Ready for your\nnext dose?",
+            "Ready for your next dose?",
             style: TextStyle(
               color: AppColors.white,
               fontSize: 22,

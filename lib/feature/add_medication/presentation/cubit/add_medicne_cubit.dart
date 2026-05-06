@@ -70,13 +70,15 @@ DateTime scheduledDate = DateTime(
     final int notificationId = medication.id.hashCode + i;
 
     // 4. استدعاء خدمة الإشعارات
-    NotificationService.scheduleNotification(
-      id: notificationId,
-      medicationName: medication.name,
-      dosage: "${medication.dosage} ${medication.unit}",
-      scheduledTime: scheduledDate,
-      frequency: medication.frequency, // 'Daily' أو 'Weekly'
-    );
+// 4. استدعاء خدمة الإشعارات
+NotificationService.scheduleNotification(
+  medicationId: medication.id, // السطر ده هو اللي ناقص وبسببه الأيرور
+  id: notificationId,
+  medicationName: medication.name,
+  dosage: "${medication.dosage} ${medication.unit}",
+  scheduledTime: scheduledDate,
+  frequency: medication.frequency, // 'Daily' أو 'Weekly'
+);
   }
 }
 }

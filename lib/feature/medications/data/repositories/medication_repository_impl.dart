@@ -10,8 +10,9 @@ class MedicationRepositoryImpl implements MedicationRepository {
   // دالة مساعدة خاصة لجلب البوكس الخاص بالمستخدم الحالي
   Future<Box<MedicationModel>> _getBox() async {
     final settings = Hive.box('users_box');
-    final String boxName = settings.get('current_user_box', defaultValue: 'default_box');
-    
+    final String boxName =
+        settings.get('current_user_box', defaultValue: 'default_box');
+
     // إذا كان البوكس مفتوحاً مسبقاً سيعيده فوراً، وإلا سيفتحه
     return await Hive.openBox<MedicationModel>(boxName);
   }
@@ -19,7 +20,7 @@ class MedicationRepositoryImpl implements MedicationRepository {
   @override
   Future<List<MedicationEntity>> getMedications() async {
     final box = await _getBox();
-    return box.values.toList(); 
+    return box.values.toList().cast<MedicationEntity>();
   }
 
   @override
@@ -46,20 +47,22 @@ class MedicationRepositoryImpl implements MedicationRepository {
   Future<void> updateMedicationStatus(String id, bool isTaken) async {
     final box = await _getBox();
     final model = box.get(id);
-    
+
     if (model != null) {
-      // تحديث الحالة فقط مع الحفاظ على باقي البيانات
-      final updatedModel = MedicationModel(
-        id: model.id,
-        name: model.name,
-        dosage: model.dosage,
-        unit: model.unit,
-        frequency: model.frequency,
-        stock: model.stock,
-        reminderTimes: model.reminderTimes,
-        isTaken: isTaken,
-      );
-      await box.put(id, updatedModel);
+      // 1. تحديث الحالة في الموديل الحالي
+      model.isTaken = isTaken;
+
+      // 2. حفظ التعديل في Hive بنفس الـ key (id)
+      await box.put(id, model);
+
+      print("Medication status updated to: $isTaken");
+    } else {
+      print("Medication with id $id not found in box");
     }
   }
+  Future<void> deleteMedication(String id) async {
+  final box = await _getBox(); // جلب البوكس الديناميكي للمستخدم
+  await box.delete(id); // الحذف باستخدام الـ ID كـ Key
+  print("Medication with id $id deleted");
+}
 }

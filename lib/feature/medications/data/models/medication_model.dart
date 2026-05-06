@@ -5,7 +5,7 @@ import 'package:reminder/feature/medications/domain/entities/medication.dart';
 part 'medication_model.g.dart';
 
 @HiveType(typeId: 0)
-class MedicationModel extends MedicationEntity {
+class MedicationModel extends HiveObject {
   @HiveField(0)
   @override
   final String id;
@@ -36,7 +36,7 @@ class MedicationModel extends MedicationEntity {
 
   @HiveField(7)
   @override
-  final bool isTaken;
+  bool isTaken;
 
   MedicationModel({
     required this.id,
@@ -47,16 +47,7 @@ class MedicationModel extends MedicationEntity {
     required this.stock,
     required this.reminderTimes,
     this.isTaken = false,
-  }) : super(
-          id: id,
-          name: name,
-          dosage: dosage,
-          unit: unit,
-          frequency: frequency,
-          stock: stock,
-          reminderTimes: reminderTimes,
-          isTaken: isTaken,
-        );
+  });
 
   MedicationModel copyWith({bool? isTaken}) {
     return MedicationModel(
