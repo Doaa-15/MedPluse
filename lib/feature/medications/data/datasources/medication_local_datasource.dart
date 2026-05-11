@@ -26,14 +26,14 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
     final box = await _getBox();
     // حفظ باستخدام الـ ID كمفتاح لضمان عدم التكرار وسهولة التحديث
     await box.put(medication.id, medication);
-    print("💾 تم الحفظ في Hive (صندوق المستخدم): ${medication.name}");
+    print(" تم الحفظ : ${medication.name}");
   }
 
   @override
   Future<List<MedicationModel>> getCachedMedications() async {
     final box = await _getBox();
     final results = box.values.toList();
-    print("📦 استرجاع البيانات: لقيت ${results.length} أدوية لهذا المستخدم");
+
     return results;
   }
 
@@ -41,6 +41,6 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
   Future<void> deleteMedication(String id) async {
     final box = await _getBox();
     await box.delete(id);
-    print("🗑️ تم حذف الدواء من صندوق المستخدم الحالي");
+    print(" تم حذف الدواء من صندوق المستخدم الحالي");
   }
 }

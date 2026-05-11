@@ -3,7 +3,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:reminder/feature/add_medication/presentation/cubit/add_medicne_state.dart';
 import 'package:reminder/feature/add_medication/domain/usecases/add_medication_usecase.dart';
 import 'package:reminder/feature/medications/data/models/medication_model.dart';
-import 'package:reminder/feature/medications/domain/entities/medication.dart';
 import 'package:reminder/notification/service/notification_service.dart';
 
 class AddMedicationCubit extends Cubit<AddMedicationState> {

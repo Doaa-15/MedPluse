@@ -48,7 +48,7 @@ class MedicationModel extends MedicationEntity {
     required this.stock,
     required this.reminderTimes,
     this.isTaken = false,
-  }) : super( // لو الـ Entity محتاج parameters في الـ super ابعتيها هنا
+  }) : super( 
           id: id,
           name: name,
           dosage: dosage,

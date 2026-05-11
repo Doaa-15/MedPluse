@@ -6,8 +6,7 @@ import 'package:reminder/feature/auth/cubit/auth_cubit.dart';
 import 'package:reminder/feature/auth/cubit/auth_state.dart';
 import 'package:reminder/feature/auth/presentation/view/login_page.dart';
 import 'package:reminder/core/widgets/custom_text_field_widget.dart';
-import 'package:reminder/feature/medications/presentation/view/home_page.dart';
-import 'package:reminder/feature/medications/presentation/view/main_wrapper.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -26,7 +25,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   bool _isPasswordHidden = true;
   bool _isConfirmPasswordHidden = true;
-  bool _isAgreed = false; // المتغير المسؤول عن تعطيل/تفعيل الزرار
+final  bool _isAgreed = false; 
   bool _isButtonEnabled = false;
 
   @override
@@ -41,7 +40,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
   void _updateButtonState() {
     setState(() {
-    
       _isButtonEnabled = _emailController.text.contains('@') &&
           _nameController.text.isNotEmpty &&
           _passwordController.text.length >= 6 &&
@@ -61,6 +59,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Container(
@@ -72,18 +72,24 @@ class _RegisterPageState extends State<RegisterPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 80),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 40),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Create Your",
-                      style: TextStyle(color: AppColors.white, fontSize: 32, fontWeight: FontWeight.w400),
+                      l10n.createAccount,
+                      style: const TextStyle(
+                          color: AppColors.white,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w400),
                     ),
                     Text(
-                      "Account",
-                      style: TextStyle(color: AppColors.white, fontSize: 32, fontWeight: FontWeight.bold),
+                      l10n.accountTitle,
+                      style: const TextStyle(
+                          color: AppColors.white,
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -98,68 +104,76 @@ class _RegisterPageState extends State<RegisterPage> {
                     topRight: Radius.circular(40),
                   ),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     children: [
-                     
                       CustomInputField(
                         controller: _nameController,
-                        label: "Full Name",
-                        hint: " Your Name",
-                        suffix: const Icon(Icons.check, size: 18, color: AppColors.primary),
-                        validator: (value) => (value == null || value.isEmpty) ? 'Name is required' : null,
+                        label: l10n.fullName,
+                        hint: l10n.nameHint,
+                        suffix: const Icon(Icons.check,
+                            size: 18, color: AppColors.primary),
+                        validator: (value) => (value == null || value.isEmpty)
+                            ? l10n.nameRequired
+                            : null,
                       ),
                       const SizedBox(height: 25),
-
-                
                       CustomInputField(
                         controller: _emailController,
-                        label: "Gmail",
-                        hint: "name@gmail.com",
-                        suffix: const Icon(Icons.check, size: 18, color: AppColors.primary),
-                        validator: (value) => (value == null || !value.contains('@')) ? 'Invalid email' : null,
+                        label: l10n
+                            .gmailLabel, // استخدمنا اللي في ملف Login لتقليل التكرار
+                        hint: l10n.emailHint,
+                        suffix: const Icon(Icons.check,
+                            size: 18, color: AppColors.primary),
+                        validator: (value) =>
+                            (value == null || !value.contains('@'))
+                                ? l10n.invalidEmail
+                                : null,
                       ),
                       const SizedBox(height: 25),
-
-                      // حقل كلمة السر
                       CustomInputField(
                         controller: _passwordController,
-                        label: "Password",
-                        hint: "******",
+                        label: l10n.passwordLabel,
+                        hint: l10n.passwordHint,
                         isPassword: true,
                         isHidden: _isPasswordHidden,
-                        onToggleVisibility: () => setState(() => _isPasswordHidden = !_isPasswordHidden),
-                        validator: (value) => (value == null || value.length < 6) ? 'Min 6 characters' : null,
+                        onToggleVisibility: () => setState(
+                            () => _isPasswordHidden = !_isPasswordHidden),
+                        validator: (value) =>
+                            (value == null || value.length < 6)
+                                ? l10n.minPassword
+                                : null,
                       ),
                       const SizedBox(height: 25),
-
-                      // حقل تأكيد كلمة السر
                       CustomInputField(
                         controller: _confirmPasswordController,
-                        label: "Confirm Password",
-                        hint: "******",
+                        label: l10n.confirmPassword,
+                        hint: l10n.passwordHint,
                         isPassword: true,
                         isHidden: _isConfirmPasswordHidden,
-                        onToggleVisibility: () => setState(() => _isConfirmPasswordHidden = !_isConfirmPasswordHidden),
-                        validator: (value) => (value != _passwordController.text) ? 'Passwords do not match' : null,
+                        onToggleVisibility: () => setState(() =>
+                            _isConfirmPasswordHidden =
+                                !_isConfirmPasswordHidden),
+                        validator: (value) =>
+                            (value != _passwordController.text)
+                                ? l10n.passwordMismatch
+                                : null,
                       ),
-
                       const SizedBox(height: 30),
-
-        
                       BlocConsumer<AuthCubit, AuthState>(
                         listener: (context, state) {
                           if (state is AuthSuccess) {
-                      
-                        Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginPage()),
-    );
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const LoginPage()),
+                            );
                           } else if (state is AuthError) {
-                            
-                           CustomSnackBar.show(context, message: state.message, isError: true);
+                            CustomSnackBar.show(context,
+                                message: state.message, isError: true);
                           }
                         },
                         builder: (context, state) {
@@ -167,7 +181,6 @@ class _RegisterPageState extends State<RegisterPage> {
                             onTap: (_isButtonEnabled && state is! AuthLoading)
                                 ? () {
                                     if (_formKey.currentState!.validate()) {
-                                
                                       context.read<AuthCubit>().register(
                                             _emailController.text.trim(),
                                             _passwordController.text.trim(),
@@ -179,35 +192,47 @@ class _RegisterPageState extends State<RegisterPage> {
                             child: Container(
                               width: double.infinity,
                               height: 55,
-                              decoration: BoxDecoration(
-                                gradient: _isButtonEnabled ? AppColors.primaryGradient : null,
-                                color: _isButtonEnabled ? null : Colors.grey[300],
-                                borderRadius: BorderRadius.circular(30),
-                              ),
+                                                              decoration: BoxDecoration(
+                                  gradient: _isButtonEnabled
+                                      ? AppColors.primaryGradient
+                                      : null,
+                                  color: _isButtonEnabled
+                                      ? null
+                                      : AppColors.primary.withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
                               child: Center(
                                 child: state is AuthLoading
-                                    ? const CircularProgressIndicator(color: AppColors.white)
-                                    : const Text(
-                                        "SIGN UP",
-                                        style: TextStyle(color: AppColors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                                    ? const CircularProgressIndicator(
+                                        color: AppColors.white)
+                                    : Text(
+                                        l10n.signUpButton,
+                                        style: const TextStyle(
+                                            color: AppColors.white,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold),
                                       ),
                               ),
                             ),
                           );
                         },
                       ),
-
                       const SizedBox(height: 40),
-
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text("Already have an account?", style: TextStyle(color: AppColors.secondary, fontSize: 13)),
+                          Text(l10n.alreadyHaveAccount,
+                              style: const TextStyle(
+                                  color: AppColors.secondary, fontSize: 13)),
                           GestureDetector(
                             onTap: () => Navigator.pop(context),
-                            child: const Text(
-                              "  Sign in",
-                              style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 15),
+                            child: Text(
+                              l10n.signUpLink.replaceFirst(" Sign up",
+                                  " Sign in"), // أو ضيفي key جديد لـ Sign in
+                              style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15),
                             ),
                           )
                         ],
@@ -222,7 +247,4 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
     );
   }
-
-
- 
 }

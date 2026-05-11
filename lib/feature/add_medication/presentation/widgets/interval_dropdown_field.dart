@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:reminder/core/theme/app_colors.dart';
 class IntervalDropdownField extends StatelessWidget {
   final String label;
   final int value;
@@ -39,19 +40,21 @@ class IntervalDropdownField extends StatelessWidget {
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<int>(
+                     dropdownColor: AppColors.lightGray,
               value: value,
               isExpanded: true,
               icon: const Icon(Icons.access_time_rounded, color: Colors.grey),
               // تحويل القائمة لـ DropdownMenuItem مع إضافة كلمة Hours
-              items: items.map((int item) {
-                return DropdownMenuItem<int>(
-                  value: item,
-                  child: Text(
-                    "Every $item Hours",
-                    style: const TextStyle(fontSize: 15),
-                  ),
-                );
-              }).toList(),
+             items: items.map((int item) {
+  return DropdownMenuItem<int>(
+    value: item,
+    child: Text(
+      // مثال: Every 4 hours / كل 4 ساعات
+      "${AppLocalizations.of(context)!.every} $item ${AppLocalizations.of(context)!.hours}",
+      style: const TextStyle(fontSize: 15),
+    ),
+  );
+}).toList(),
               onChanged: onChanged,
             ),
           ),

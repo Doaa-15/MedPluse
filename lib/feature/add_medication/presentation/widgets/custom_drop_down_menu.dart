@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:reminder/core/theme/app_colors.dart';
 
 class CustomDropdownField extends StatelessWidget {
   final String? label;
   final String value;
   final List<String> items;
   final Function(String?) onChanged;
+  final String Function(String)? itemBuilder; // إضافة المتغير هنا
 
   const CustomDropdownField({
     super.key,
@@ -12,6 +14,7 @@ class CustomDropdownField extends StatelessWidget {
     required this.value,
     required this.items,
     required this.onChanged,
+    this.itemBuilder, // إضافته في الـ constructor
   });
 
   @override
@@ -39,14 +42,18 @@ class CustomDropdownField extends StatelessWidget {
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
+              dropdownColor: AppColors.lightGray,
               value: value,
               isExpanded: true,
-              icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.grey),
+              icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                  color: Colors.grey),
               items: items
                   .map((item) => DropdownMenuItem(
+                    
                         value: item,
                         child: Text(
-                          item,
+                          // هنا التعديل: لو الـ itemBuilder موجود استخدمه، لو لأ اعرض النص العادي
+                          itemBuilder != null ? itemBuilder!(item) : item,
                           style: const TextStyle(fontSize: 15),
                         ),
                       ))
@@ -55,7 +62,7 @@ class CustomDropdownField extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 16), // مسافة ثابتة تحت الـ Dropdown
+        const SizedBox(height: 16),
       ],
     );
   }

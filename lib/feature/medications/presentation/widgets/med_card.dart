@@ -5,33 +5,34 @@ import 'package:reminder/feature/medications/presentation/cubit/medications_cubi
 import 'package:reminder/notification/service/notification_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 class MedCard extends StatelessWidget {
   final MedicationModel med;
 
   const MedCard({super.key, required this.med});
 
-  // ميثود لإظهار نافذة تأكيد الحذف لضمان أفضل تجربة مستخدم (UX)
   void _showDeleteDialog(BuildContext context) {
+    // تعريف متغير للوصول للترجمة بسهولة
+    final l10n = AppLocalizations.of(context)!;
+
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        title: const Text("Delete Medication?"),
-        content: const Text(
-          "Are you sure you want to remove this medication from your schedule?",
-        ),
+        title: Text(l10n.deleteTitle),
+        content: Text(l10n.deleteContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+            child: Text(l10n.cancel, style: const TextStyle(color: Colors.grey)),
           ),
           TextButton(
             onPressed: () {
-              // استدعاء ميثود الحذف من الـ Cubit باستخدام الـ ID
               context.read<MedicationCubit>().deleteMedication(med.id);
               Navigator.pop(dialogContext);
             },
-            child: const Text("Delete", style: TextStyle(color: Colors.red)),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -40,10 +41,11 @@ class MedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Dismissible(
       key: Key(med.id),
       direction: DismissDirection.endToStart,
-      // خلفية الحذف عند السحب
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.symmetric(horizontal: 25),
@@ -57,7 +59,8 @@ class MedCard extends StatelessWidget {
       onDismissed: (direction) {
         context.read<MedicationCubit>().deleteMedication(med.id);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("${med.name} deleted")),
+          // استخدام الترجمة مع تمرير متغير (اسم الدواء)
+          SnackBar(content: Text(l10n.deletedMessage(med.name))),
         );
       },
       child: Container(
@@ -79,7 +82,6 @@ class MedCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                // أيقونة الدواء
                 Container(
                   height: 50,
                   width: 50,
@@ -91,7 +93,6 @@ class MedCard extends StatelessWidget {
                       color: AppColors.primary, size: 28),
                 ),
                 const SizedBox(width: 15),
-                // بيانات الدواء
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -112,7 +113,6 @@ class MedCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                // توقيت آخر إشعار
                 Text(
                   med.reminderTimes.isNotEmpty
                       ? med.reminderTimes.last.toString()
@@ -126,24 +126,20 @@ class MedCard extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-             
-               
                 const Spacer(),
-                // زر التأجيل
                 TextButton(
                   onPressed: () {
                     NotificationService.snoozeNotification(med);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Remind you in 5 minutes")),
+                      SnackBar(content: Text(l10n.remindIn5)),
                     );
                   },
                   style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
-                  child: const Text("Snooze",
-                      style: TextStyle(
+                  child: Text(l10n.snooze,
+                      style: const TextStyle(
                           color: Colors.grey, fontWeight: FontWeight.w500)),
                 ),
                 const SizedBox(width: 8),
-                // زر تأكيد أخذ الدواء
                 ElevatedButton(
                   onPressed: med.isTaken
                       ? null
@@ -156,8 +152,7 @@ class MedCard extends StatelessWidget {
                         : AppColors.primary,
                     foregroundColor: Colors.white,
                     elevation: 0,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)),
                     disabledBackgroundColor: Colors.grey.shade300,
@@ -171,7 +166,7 @@ class MedCard extends StatelessWidget {
                         const SizedBox(width: 5),
                       ],
                       Text(
-                        med.isTaken ? "Done" : "Take",
+                        med.isTaken ? l10n.done : l10n.take,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ],

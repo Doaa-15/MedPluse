@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:reminder/core/theme/app_colors.dart'; // تأكدي من المسار
+import 'package:reminder/core/theme/app_colors.dart'; 
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 
 class MedPulseHeader extends StatelessWidget {
   final Color ?backgroundColor;
@@ -18,7 +20,7 @@ class MedPulseHeader extends StatelessWidget {
       width: double.infinity,
       decoration:const BoxDecoration(
         color: AppColors.primary,
-        borderRadius: const BorderRadius.only(
+        borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(30),
           bottomRight: Radius.circular(30),
         ),
@@ -29,9 +31,9 @@ class MedPulseHeader extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                "MedPulse",
-                style: TextStyle(
+               Text(
+                AppLocalizations.of(context)!.appTitle,
+                style:const TextStyle(
                   color: AppColors.white,
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
@@ -54,9 +56,9 @@ class MedPulseHeader extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          const Text(
-            "Ready for your next dose?",
-            style: TextStyle(
+           Text(
+            AppLocalizations.of(context)!.readyDose,
+            style:const TextStyle(
               color: AppColors.white,
               fontSize: 22,
               fontWeight: FontWeight.w500,

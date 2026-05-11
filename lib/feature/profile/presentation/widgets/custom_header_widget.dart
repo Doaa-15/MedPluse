@@ -45,7 +45,6 @@ class ProfileHeader extends StatelessWidget {
               child: CircleAvatar(
                 radius: 55,
                 backgroundColor: Colors.white,
-                // عرض الصورة من الرابط إذا وجد
                 backgroundImage: (user.profileUrl != null && user.profileUrl!.isNotEmpty)
                     ? NetworkImage(user.profileUrl!)
                     : null,

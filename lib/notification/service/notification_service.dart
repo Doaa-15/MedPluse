@@ -67,7 +67,7 @@ class NotificationService {
 
 static Future<void> scheduleNotification({
     required String medicationId,
-    required int id, // الـ ID ده هو id.hashCode اللي جاي من الـ UI
+    required int id,
     required String medicationName,
     required String dosage,
     required DateTime scheduledTime,
@@ -127,7 +127,7 @@ static Future<void> scheduleNotification({
       // الجدولة العادية (يومي أو أسبوعي أو مرة واحدة)
       await _notificationsPlugin.zonedSchedule(
         id,
-        'MedSync Reminder',
+        'MedPluse Reminder',
         'It\'s time for $medicationName ($dosage)',
         tz.TZDateTime.from(scheduledTime, tz.local),
         platformDetails,

@@ -26,7 +26,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
           ));
         }
       }
-      return Left(CacheFailure(message: "User not found locally"));
+      return const Left(CacheFailure(message: "User not found locally"));
     } catch (e) {
       return Left(CacheFailure(message: e.toString()));
     }
@@ -39,7 +39,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
       final String? currentEmail = box.get('current_user_email');
 
       if (currentEmail == null) {
-        return Left(CacheFailure(message: "User session not found"));
+        return const Left(CacheFailure(message: "User session not found"));
       }
 
       // تحديد مسار واسم الصورة

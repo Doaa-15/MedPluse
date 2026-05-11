@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:reminder/core/theme/app_colors.dart';
 import 'package:reminder/feature/add_medication/presentation/cubit/add_medicne_cubit.dart';
 import 'package:reminder/feature/add_medication/presentation/view/add_medicine.dart';
@@ -12,6 +11,8 @@ import 'package:reminder/feature/medications/presentation/widgets/med_card.dart'
 import 'package:reminder/feature/medications/presentation/widgets/med_pulse_header.dart';
 import 'package:reminder/feature/medications/presentation/widgets/schedule_header.dart';
 import 'package:reminder/injection_container.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -71,7 +72,7 @@ class HomePage extends StatelessWidget {
                             final medications = box.values.toList();
 
                             if (medications.isEmpty) {
-                              return EmptyMedicationsState();
+                              return const EmptyMedicationsState();
                             }
 
                             return Column(
@@ -85,11 +86,11 @@ children: medications.map((m) => MedCard(med: m)).toList(),
   children: [
     Expanded(
       child: HomeActionButton(
-        label: "Add Medicine",
+        label: AppLocalizations.of(context)!.addMedicine,
         icon: Icons.add_rounded,
-        color: AppColors.primary, // أو الـ color الممرر
+        color: AppColors.primary, 
         onTap: () {
-          // منطق الـ Navigation والـ BlocProvider
+
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -105,7 +106,7 @@ children: medications.map((m) => MedCard(med: m)).toList(),
     const SizedBox(width: 15),
     Expanded(
       child: HomeActionButton(
-        label: "Schedule",
+        label: AppLocalizations.of(context)!.schedule,
         icon: Icons.calendar_today_rounded,
         color: AppColors.primary,
         onTap: () {

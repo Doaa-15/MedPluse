@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:reminder/core/theme/app_colors.dart'; // تأكدي من مسار الألوان
+// تأكدي من مسار الألوان
 
 class CustomSnackBar {
   static void show(

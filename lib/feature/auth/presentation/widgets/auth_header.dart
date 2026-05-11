@@ -9,10 +9,10 @@ class AuthHeader extends StatelessWidget {
     return Container(
       height: MediaQuery.of(context).size.height * 0.3,
       width: double.infinity,
-      color: AppColors.primary, // اللون الأخضر بتاعنا
+      color: AppColors.primary,
       child: Stack(
         children: [
-          // هنا ممكن تحطي صورة الكبسولات اللي في التصميم
+
           Center(child: Icon(Icons.medication_liquid, size: 100, color: Colors.white.withOpacity(0.3))),
         ],
       ),

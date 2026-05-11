@@ -10,7 +10,7 @@
     <application
         android:label="MedPluse"
         android:name="${applicationName}"
-        android:icon="@mipmap/launcher_icon">
+        android:icon="@mipmap/ic_launcher">
 <receiver
     android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
     android:exported="false" />

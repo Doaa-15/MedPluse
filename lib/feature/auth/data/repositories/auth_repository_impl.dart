@@ -27,7 +27,7 @@ class AuthRepositoryImpl implements AuthRepository {
         );
         return const Right(null);
       } else {
-        return Left(
+        return const Left(
           ServerFailure(message: "حدث خطأ غير متوقع أثناء تسجيل الدخول"),
         );
       }
@@ -38,7 +38,7 @@ class AuthRepositoryImpl implements AuthRepository {
       if (errorMessage.contains('invalid login credentials') ||
           errorMessage.contains('not found') ||
           errorMessage.contains('no user')) {
-        return Left(
+        return const Left(
           ServerFailure(
             message: "Account does not exist or invalid credentials",
           ),
@@ -52,11 +52,11 @@ class AuthRepositoryImpl implements AuthRepository {
           return const Right(null);
         } else {
           // لو الداتا موجودة بس الباسورد اللي دخل غلط أوفلاين
-          return Left(CacheFailure(message: "Invalid offline credentials"));
+          return const Left(CacheFailure(message: "Invalid offline credentials"));
         }
       } catch (cacheError) {
         // لو الإيميل أصلاً مش موجود في Hive
-        return Left(
+        return const Left(
           CacheFailure(
             message:
                 "Account does not exist locally. Please connect to internet.",
@@ -79,12 +79,12 @@ class AuthRepositoryImpl implements AuthRepository {
         await localDataSource.registerUser(email, password, name);
         return const Right(null);
       } else {
-        return Left(ServerFailure(message: "Could not create user account"));
+        return const Left(ServerFailure(message: "Could not create user account"));
       }
     } catch (e) {
       // هندلة لو الإيميل موجود قبل كدة
       if (e.toString().contains('already registered')) {
-        return Left(ServerFailure(message: "This email is already in use"));
+        return const Left(ServerFailure(message: "This email is already in use"));
       }
       return Left(ServerFailure(message: e.toString()));
     }

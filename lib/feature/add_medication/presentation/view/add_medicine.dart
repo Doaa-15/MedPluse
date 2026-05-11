@@ -13,6 +13,7 @@ import 'package:reminder/feature/add_medication/presentation/widgets/section_tit
 import 'package:reminder/feature/medications/data/models/medication_model.dart';
 import 'package:reminder/feature/medications/presentation/cubit/medications_cubit.dart';
 import 'package:reminder/feature/medications/presentation/view/main_wrapper.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AddMedicationPage extends StatefulWidget {
   final bool isInTabs;
@@ -30,9 +31,9 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
 
   String _selectedFrequency = 'Daily';
   int _selectedInterval = 8;
-  final List<int> _intervalOptions = [4, 6, 8, 12, 24];
+  final List<int> _intervalOptions = [4, 6, 8, 12];
   String _selectedUnit = 'Pills';
-  List<TimeOfDay> _selectedTimes = [];
+ final List<TimeOfDay> _selectedTimes = [];
 
   @override
   void dispose() {
@@ -62,7 +63,7 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
           context.read<MedicationCubit>().fetchMedications();
 
           CustomSnackBar.show(context,
-              message: "Medication Added Successfully!", isError: false);
+              message: AppLocalizations.of(context)!.addSuccess, isError: false);
 
           if (Navigator.canPop(context)) {
             Navigator.pop(context);
@@ -73,7 +74,7 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
             );
           }
         } else if (state is AddMedicationError) {
-          print("Add Error: ${state.message}");
+       
           CustomSnackBar.show(context, message: state.message, isError: true);
         }
       },
@@ -84,52 +85,73 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
           children: [
             if (widget.isInTabs) const SizedBox(height: 50),
 
-            const SectionTitle(title: "General Information"),
+             SectionTitle(title: AppLocalizations.of(context)!.generalInfo),
             CustomCardTextField(
               controller: _nameController,
-              hint: "Medication Name",
+              hint: AppLocalizations.of(context)!.medName,
               icon: Icons.medication_rounded,
-              validator: (v) => v!.isEmpty ? "Required" : null,
+              validator: (v) => v!.isEmpty ? AppLocalizations.of(context)!.requiredField : null,
             ),
             const SizedBox(height: 15),
             CustomCardTextField(
               controller: _dosageController,
-              hint: "Dosage",
+              hint: AppLocalizations.of(context)!.dosage,
               icon: Icons.scale_rounded,
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 15),
 
-            CustomDropdownField(
-              label: "Unit",
-              value: _selectedUnit,
-              items: const ['Pills', 'Syrup', 'Injection', 'Drops'],
-              onChanged: (val) => setState(() => _selectedUnit = val!),
-            ),
+          CustomDropdownField(
+  label: AppLocalizations.of(context)!.unit,
+  value: _selectedUnit, 
+  items: const ['Pills', 'Syrup', 'Injection', 'Drops'],
+  
+
+  itemBuilder: (item) {
+    switch (item) {
+      case 'Pills': return AppLocalizations.of(context)!.pills;
+      case 'Syrup': return AppLocalizations.of(context)!.syrup;
+      case 'Injection': return AppLocalizations.of(context)!.injection;
+      case 'Drops': return AppLocalizations.of(context)!.drops;
+      default: return item;
+    }
+  },
+  onChanged: (val) => setState(() => _selectedUnit = val!),
+),
             const SizedBox(height: 15),
 
-            CustomDropdownField(
-              label: "Frequency",
-              value: _selectedFrequency,
-              items: const ['Daily', 'Weekly', 'Interval'],
-              onChanged: (val) => setState(() => _selectedFrequency = val!),
-            ),
+           CustomDropdownField(
+  label: AppLocalizations.of(context)!.frequency,
+  value: _selectedFrequency,
+  items: const ['Daily', 'Weekly', 'Interval'],
+  onChanged: (val) => setState(() => _selectedFrequency = val!),
+  // الترجمة هنا بناءً على القيمة المخزنة
+  itemBuilder: (item) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (item) {
+      case 'Daily': return l10n.daily;
+      case 'Weekly': return l10n.weekly;
+      case 'Interval': return l10n.interval;
+      default: return item;
+    }
+  },
+),
 
-            // يظهر فقط لو اختار Interval
-            if (_selectedFrequency == 'Interval') ...[
-              const SizedBox(height: 15),
-              IntervalDropdownField(
-                label: "How often do you take it?",
-                value: _selectedInterval,
-                items: _intervalOptions,
-                onChanged: (val) => setState(() => _selectedInterval = val!),
-              ),
-            ],
+// يظهر فقط لو اختار Interval
+if (_selectedFrequency == 'Interval') ...[
+  const SizedBox(height: 15),
+  IntervalDropdownField(
+    label: AppLocalizations.of(context)!.howOften,
+    value: _selectedInterval,
+    items: _intervalOptions,
+    onChanged: (val) => setState(() => _selectedInterval = val!),
+  ),
+],
 
             const SizedBox(height: 25),
-            const Text(
-              "Reminder Times",
-              style: TextStyle(
+             Text(
+              AppLocalizations.of(context)!.reminderTimes,
+              style:const TextStyle(
                   fontWeight: FontWeight.w600, color: Colors.blueGrey),
             ),
             const SizedBox(height: 10),
@@ -148,8 +170,8 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
                     )),
                 ActionChip(
                   avatar: const Icon(Icons.add, size: 18, color: Colors.white),
-                  label: const Text("Add Time",
-                      style: TextStyle(color: Colors.white)),
+                  label:  Text(AppLocalizations.of(context)!.addTime,
+                      style:const TextStyle(color: Colors.white)),
                   backgroundColor: AppColors.primary,
                   onPressed: () => _selectTime(context),
                 ),
@@ -170,7 +192,7 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
                   if (_selectedTimes.isEmpty) {
                    
           CustomSnackBar.show(context,
-              message: "Please add at least one reminder time", isError: false);
+              message: AppLocalizations.of(context)!.addTimeError, isError: false);
                     return;
                   }
 
@@ -200,8 +222,8 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
                       .addMedication(medication, boxName: boxName);
                 }
               },
-              child: const Text("Save Medication",
-                  style: TextStyle(
+              child:  Text(AppLocalizations.of(context)!.saveMedication,
+                  style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.bold)),
@@ -219,8 +241,8 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text("New Medication",
-            style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+        title:  Text(AppLocalizations.of(context)!.addNewMedication,
+            style:const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),

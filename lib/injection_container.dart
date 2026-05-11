@@ -2,7 +2,6 @@ import 'package:get_it/get_it.dart';
 import 'package:reminder/feature/auth/data/datasources/auth_local_data_source.dart';
 import 'package:reminder/feature/profile/data/repositories/profile_repository_impl.dart';
 import 'package:reminder/feature/profile/domain/repositories/profile_repository.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 // --- Presentation (Cubits) ---
 import 'package:reminder/feature/add_medication/presentation/cubit/add_medicne_cubit.dart';

@@ -1,12 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:reminder/feature/auth/data/repositories/auth_repository_impl.dart';
 import 'package:reminder/feature/profile/domain/repositories/profile_repository.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'profile_state.dart'; // استيراد ملف الـ State
-import '../../domain/usecases/get_user_data_usecase.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
 
