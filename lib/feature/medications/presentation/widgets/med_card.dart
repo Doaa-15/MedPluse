@@ -126,7 +126,7 @@ class MedCard extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                // زر حذف إضافي (اختياري بجانب الأزرار)
+             
                
                 const Spacer(),
                 // زر التأجيل

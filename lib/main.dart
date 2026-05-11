@@ -8,10 +8,12 @@ import 'package:reminder/feature/medications/data/models/medication_model.dart';
 import 'package:reminder/feature/medications/presentation/cubit/medications_cubit.dart';
 import 'package:reminder/feature/medications/presentation/view/main_wrapper.dart';
 import 'package:reminder/feature/profile/presentation/cubit/profile_cubit.dart';
+
 import 'package:reminder/injection_container.dart' as di;
 import 'package:reminder/injection_container.dart';
 import 'package:reminder/notification/service/notification_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 
 Future<void> main() async {
   // 1. التأكد من تهيئة Flutter
@@ -43,6 +45,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
       final user = Supabase.instance.client.auth.currentUser;
     return MultiBlocProvider(
       providers: [

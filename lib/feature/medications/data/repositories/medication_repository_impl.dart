@@ -44,22 +44,19 @@ class MedicationRepositoryImpl implements MedicationRepository {
   }
 
   @override
-  Future<void> updateMedicationStatus(String id, bool isTaken) async {
-    final box = await _getBox();
-    final model = box.get(id);
+  @override
+Future<void> updateMedicationStatus(String id, bool isTaken) async {
+  // افتحي البوكس اللي متخزن فيه الأدوية
+  final settings = await Hive.openBox('users_box');
+  final String boxName = settings.get('current_user_box', defaultValue: 'default_box');
+  final box = await Hive.openBox<MedicationModel>(boxName);
 
-    if (model != null) {
-      // 1. تحديث الحالة في الموديل الحالي
-      model.isTaken = isTaken;
-
-      // 2. حفظ التعديل في Hive بنفس الـ key (id)
-      await box.put(id, model);
-
-      print("Medication status updated to: $isTaken");
-    } else {
-      print("Medication with id $id not found in box");
-    }
+  final med = box.get(id);
+  if (med != null) {
+    med.isTaken = isTaken; // تحديث الحالة
+    await box.put(id, med); // حفظ التعديل
   }
+}
   Future<void> deleteMedication(String id) async {
   final box = await _getBox(); // جلب البوكس الديناميكي للمستخدم
   await box.delete(id); // الحذف باستخدام الـ ID كـ Key

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:reminder/core/theme/app_colors.dart';
+import 'package:reminder/core/widgets/custom_snack_bar.dart';
 import 'package:reminder/feature/auth/cubit/auth_cubit.dart';
 import 'package:reminder/feature/auth/cubit/auth_state.dart';
 import 'package:reminder/feature/auth/presentation/view/login_page.dart';
+import 'package:reminder/core/widgets/custom_text_field_widget.dart';
 import 'package:reminder/feature/medications/presentation/view/home_page.dart';
 import 'package:reminder/feature/medications/presentation/view/main_wrapper.dart';
 
@@ -39,7 +41,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   void _updateButtonState() {
     setState(() {
-      // شروط تفعيل الزرار: الحقول غير فارغة، البريد يحتوي @، كلمة السر >= 6، وتطابق كلمتي السر، والموافقة على الشروط
+    
       _isButtonEnabled = _emailController.text.contains('@') &&
           _nameController.text.isNotEmpty &&
           _passwordController.text.length >= 6 &&
@@ -101,8 +103,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   key: _formKey,
                   child: Column(
                     children: [
-                      // حقل الاسم الكامل
-                      _buildInputField(
+                     
+                      CustomInputField(
                         controller: _nameController,
                         label: "Full Name",
                         hint: " Your Name",
@@ -111,8 +113,8 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 25),
 
-                      // حقل البريد الإلكتروني
-                      _buildInputField(
+                
+                      CustomInputField(
                         controller: _emailController,
                         label: "Gmail",
                         hint: "name@gmail.com",
@@ -122,10 +124,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       const SizedBox(height: 25),
 
                       // حقل كلمة السر
-                      _buildInputField(
+                      CustomInputField(
                         controller: _passwordController,
                         label: "Password",
-                        hint: "..........",
+                        hint: "******",
                         isPassword: true,
                         isHidden: _isPasswordHidden,
                         onToggleVisibility: () => setState(() => _isPasswordHidden = !_isPasswordHidden),
@@ -134,57 +136,30 @@ class _RegisterPageState extends State<RegisterPage> {
                       const SizedBox(height: 25),
 
                       // حقل تأكيد كلمة السر
-                      _buildInputField(
+                      CustomInputField(
                         controller: _confirmPasswordController,
                         label: "Confirm Password",
-                        hint: "..........",
+                        hint: "******",
                         isPassword: true,
                         isHidden: _isConfirmPasswordHidden,
                         onToggleVisibility: () => setState(() => _isConfirmPasswordHidden = !_isConfirmPasswordHidden),
                         validator: (value) => (value != _passwordController.text) ? 'Passwords do not match' : null,
                       ),
 
-                      const SizedBox(height: 20),
-
-                      // خانة الموافقة على الشروط (مهمة لتفعيل الزرار)
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: _isAgreed,
-                            activeColor: AppColors.primary,
-                            onChanged: (value) {
-                              setState(() {
-                                _isAgreed = value ?? false;
-                                _updateButtonState();
-                              });
-                            },
-                          ),
-                          const Text(
-                            "I agree to the Terms and Conditions",
-                            style: TextStyle(color: AppColors.secondary, fontSize: 13),
-                          ),
-                        ],
-                      ),
-
                       const SizedBox(height: 30),
 
-                      // زر التسجيل مع BlocConsumer لمتابعة الحالات
+        
                       BlocConsumer<AuthCubit, AuthState>(
                         listener: (context, state) {
                           if (state is AuthSuccess) {
-                            // النجاح: الانتقال للهوم وتفريغ الستاك
+                      
                         Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const LoginPage()),
     );
                           } else if (state is AuthError) {
-                            // الخطأ: عرض رسالة من السوبر بيز
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(state.message), 
-                                backgroundColor: Colors.redAccent,
-                              ),
-                            );
+                            
+                           CustomSnackBar.show(context, message: state.message, isError: true);
                           }
                         },
                         builder: (context, state) {
@@ -192,7 +167,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             onTap: (_isButtonEnabled && state is! AuthLoading)
                                 ? () {
                                     if (_formKey.currentState!.validate()) {
-                                      // نداء دالة register من الكيوبيت
+                                
                                       context.read<AuthCubit>().register(
                                             _emailController.text.trim(),
                                             _passwordController.text.trim(),
@@ -224,7 +199,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
                       const SizedBox(height: 40),
 
-                      // العودة لتسجيل الدخول
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -249,44 +223,6 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // ميثود بناء الحقول الموحدة
-  Widget _buildInputField({
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-    bool isPassword = false,
-    bool? isHidden,
-    VoidCallback? onToggleVisibility,
-    Widget? suffix,
-    String? Function(String?)? validator,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16)),
-        TextFormField(
-          controller: controller,
-          obscureText: isPassword ? (isHidden ?? true) : false,
-          validator: validator,
-          style: const TextStyle(color: AppColors.primary, fontSize: 14),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: const TextStyle(color: AppColors.lightGray, fontSize: 13),
-            suffixIcon: isPassword
-                ? IconButton(
-                    icon: Icon(
-                      (isHidden ?? true) ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                      color: AppColors.secondary,
-                      size: 18,
-                    ),
-                    onPressed: onToggleVisibility,
-                  )
-                : suffix,
-            enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppColors.lightGray, width: 1)),
-            focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppColors.primary)),
-          ),
-        ),
-      ],
-    );
-  }
+
+ 
 }

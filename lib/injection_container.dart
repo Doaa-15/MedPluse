@@ -1,5 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:reminder/feature/auth/data/datasources/auth_local_data_source.dart';
+import 'package:reminder/feature/profile/data/repositories/profile_repository_impl.dart';
+import 'package:reminder/feature/profile/domain/repositories/profile_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // --- Presentation (Cubits) ---
@@ -44,7 +46,8 @@ Future<void> init() async {
   sl.registerFactory(
     () => MedicationCubit(
       getMedicationsUseCase: sl(),
-      repository: sl(),
+      
+       medicationRepository: sl(),
     ),
   );
 
@@ -62,19 +65,21 @@ Future<void> init() async {
     ),
   );
 
-  sl.registerFactory(
-    () => ProfileCubit(
-      sl(), // GetUserDataUseCase
-      authRepository: sl(), // يحتاجه لرفع الصور
-    ),
-  );
+sl.registerFactory(
+  () => ProfileCubit(
+    profileRepository: sl(), // ده اللي هيشيل ميثود الرفع وميثود الـ Get
+  ),
+);
 
   // ----------------- 3. Repositories (Data Layer Implementation) -----------------
   
   sl.registerLazySingleton<MedicationRepository>(
     () => MedicationRepositoryImpl(),
   );
-
+// Repositories
+sl.registerLazySingleton<ProfileRepository>(
+  () => ProfileRepositoryImpl(),
+);
 // السطر ده صح في ملفك
   sl.registerLazySingleton<AuthRepository>(
         () => AuthRepositoryImpl(

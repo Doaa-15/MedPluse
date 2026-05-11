@@ -4,18 +4,17 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:reminder/feature/medications/data/models/medication_model.dart';
-import 'package:reminder/feature/medications/data/repositories/medication_repository_impl.dart';
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
 
   static Future<void> init() async {
     tz.initializeTimeZones();
-    final String timeZoneName = await FlutterTimezone.getLocalTimezone(); 
+    final String timeZoneName = await FlutterTimezone.getLocalTimezone();
     tz.setLocalLocation(tz.getLocation(timeZoneName));
 
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher'); 
+        AndroidInitializationSettings('@mipmap/ic_launcher');
 
     const InitializationSettings initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid,
@@ -24,83 +23,73 @@ class NotificationService {
     await _notificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: onNotificationTap,
-      onDidReceiveBackgroundNotificationResponse: onNotificationTap, // ضروري للأزرار
+      onDidReceiveBackgroundNotificationResponse: onNotificationTap,
     );
   }
 
-  // نقطة الدخول للأكشنز في الخلفية
-@pragma('vm:entry-point')
+  @pragma('vm:entry-point')
   static void onNotificationTap(NotificationResponse details) async {
     final String? actionId = details.actionId;
     final String? medicationId = details.payload;
 
     if (medicationId == null) return;
 
+    // 1. تهيئة الـ Timezones والـ Hive ضروري جداً في الـ Isolate المنفصل
+    tz.initializeTimeZones();
     await Hive.initFlutter();
+    
     if (!Hive.isAdapterRegistered(0)) {
       Hive.registerAdapter(MedicationModelAdapter());
     }
 
-    // هاتي اسم البوكس الصحيح من الـ settings زي ما بتعملي في الـ Cubit
+    // 2. فتح الـ Boxes للوصول للبيانات
     final settings = await Hive.openBox('users_box');
     final String boxName = settings.get('current_user_box', defaultValue: 'default_box');
+    final box = await Hive.openBox<MedicationModel>(boxName);
 
-    if (!Hive.isBoxOpen(boxName)) {
-      await Hive.openBox<MedicationModel>(boxName);
-    }
-
-    final repository = MedicationRepositoryImpl();
-
-  if (actionId == 'take_action') {
-  final repository = MedicationRepositoryImpl();
-  // تأكدي إن الميثود دي جواها بتفتح البوكس، بتعدل، ثم بتعمل put
-  await repository.updateMedicationStatus(medicationId, true);
-  print("Medication marked as taken from Notification Action");
-  
-  // ملحوظة: الـ Hive بيحتاج أحياناً وقت بسيط عشان يكتب في الملف، 
-  // الـ ValueListenableBuilder في الهوم المفروض يلقط ده لوحده.
-}
-    
-      
-      
-     else if (actionId == 'snooze_action') {
-      // 2. تنفيذ الـ Snooze (غفوة 5 دقائق)
-      final meds = await repository.getMedications();
-      try {
-        final med = meds.firstWhere((e) => e.id == medicationId);
-        await snoozeNotification(med as MedicationModel);
-      } catch (e) {
-        print("Error snoozing: $e");
+    if (actionId == 'take_action') {
+      final med = box.get(medicationId);
+      if (med != null) {
+        med.isTaken = true; 
+        await box.put(medicationId, med);
+        print("Done: Medication marked as taken");
+      }
+    } 
+    else if (actionId == 'snooze_action') {
+      final med = box.get(medicationId);
+      if (med != null) {
+        // تنفيذ السنوز
+        await snoozeNotification(med);
+        print("Snooze: Scheduled for 5 minutes later");
       }
     }
   }
 
-  static Future<void> scheduleNotification({
+static Future<void> scheduleNotification({
     required String medicationId,
-    required int id,
+    required int id, // الـ ID ده هو id.hashCode اللي جاي من الـ UI
     required String medicationName,
     required String dosage,
     required DateTime scheduledTime,
-    required String frequency, 
-    int? intervalHours, 
+    required String frequency,
+    int? intervalHours,
   }) async {
-    
-const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
       'med_channel',
       'Medication Reminders',
       importance: Importance.max,
       priority: Priority.high,
-      fullScreenIntent: true, // ضيفي السطر ده
+      fullScreenIntent: true,
       actions: <AndroidNotificationAction>[
         AndroidNotificationAction(
-          'take_action', 
-          'Take', 
-          showsUserInterface: true, // ده هيفتح التطبيق ويشغل الـ Listener
-          cancelNotification: true, // يقفل الإشعار بعد الضغط
+          'take_action',
+          'Take',
+          showsUserInterface: true,
+          cancelNotification: true,
         ),
         AndroidNotificationAction(
-          'snooze_action', 
-          'Snooze', 
+          'snooze_action',
+          'Snooze',
           showsUserInterface: false,
           cancelNotification: true,
         ),
@@ -110,29 +99,35 @@ const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
     const NotificationDetails platformDetails = NotificationDetails(android: androidDetails);
 
     if (frequency == 'Interval' && intervalHours != null && intervalHours > 0) {
-      int occurrencesPerDay = 24 ~/ intervalHours; 
+      // بنحسب هيتكرر كام مرة في الـ 24 ساعة
+      int occurrencesPerDay = 24 ~/ intervalHours;
+      
       for (int i = 0; i < occurrencesPerDay; i++) {
         DateTime instanceTime = scheduledTime.add(Duration(hours: i * intervalHours));
         tz.TZDateTime scheduledDate = tz.TZDateTime.from(instanceTime, tz.local);
+        
+        // لو الوقت فات، بنجدوله لبكرة
         if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
           scheduledDate = scheduledDate.add(const Duration(days: 1));
         }
+
         await _notificationsPlugin.zonedSchedule(
-          id + i, 
-          'MedPluse Reminder',
+          id + i, // بنزود i عشان كل ميعاد يكون ليه ID فريد ميمسحش اللي قبله
+          'MedSync Reminder',
           'It\'s time for $medicationName ($dosage)',
           scheduledDate,
           platformDetails,
           uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-          matchDateTimeComponents: DateTimeComponents.time, 
+          matchDateTimeComponents: DateTimeComponents.time,
           payload: medicationId,
         );
       }
     } else {
+      // الجدولة العادية (يومي أو أسبوعي أو مرة واحدة)
       await _notificationsPlugin.zonedSchedule(
         id,
-        'MedPluse Reminder',
+        'MedSync Reminder',
         'It\'s time for $medicationName ($dosage)',
         tz.TZDateTime.from(scheduledTime, tz.local),
         platformDetails,
@@ -145,16 +140,22 @@ const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
       );
     }
   }
-
   static Future<void> snoozeNotification(MedicationModel medication) async {
+    // تحديد وقت الغفوة (5 دقائق من الآن)
     final nextTime = DateTime.now().add(const Duration(minutes: 5));
+    
+    // التأكد من تهيئة الوقت قبل الجدولة (احتياطاً للـ Isolate)
+    tz.initializeTimeZones();
+    final String timeZoneName = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(timeZoneName));
+
     await scheduleNotification(
       medicationId: medication.id,
-      id: (medication.id.hashCode + 999).abs(), // ID فريد للسنوز
+      id: (medication.id.hashCode + DateTime.now().millisecond).abs(), // ID مختلف عشان ميمسحش القديم
       medicationName: medication.name,
       dosage: medication.dosage,
       scheduledTime: nextTime,
-      frequency: 'Once', 
+      frequency: 'Once',
     );
   }
 
@@ -165,5 +166,16 @@ const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
     await _notificationsPlugin
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.requestExactAlarmsPermission();
+  }
+  // داخل كلاس NotificationService
+static Future<void> cancelNotification(int id) async {
+    // 1. مسح الـ ID الأساسي
+    await _notificationsPlugin.cancel(id);
+    
+    // 2. مسح أي احتمالات لـ IDs تانية لو كان الدواء Interval
+    for (int i = 1; i <= 24; i++) {
+      await _notificationsPlugin.cancel(id + i);
+    }
+    print("All scheduled notifications for ID $id have been canceled.");
   }
 }

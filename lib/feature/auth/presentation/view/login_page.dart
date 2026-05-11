@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:reminder/core/theme/app_colors.dart'; // استدعاء ملف الألوان الخاص بك
+import 'package:reminder/core/widgets/custom_snack_bar.dart';
 import 'package:reminder/feature/auth/cubit/auth_cubit.dart';
 import 'package:reminder/feature/auth/cubit/auth_state.dart';
 import 'package:reminder/feature/auth/presentation/view/register_page.dart';
-import 'package:reminder/feature/medications/presentation/view/home_page.dart';
+import 'package:reminder/core/widgets/custom_text_field_widget.dart';
 import 'package:reminder/feature/medications/presentation/view/main_wrapper.dart';
 
 class LoginPage extends StatefulWidget {
@@ -18,8 +19,6 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
-  bool _isPasswordHidden = true;
   bool _isButtonEnabled = false;
 
   @override
@@ -46,7 +45,6 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // استخدام اللون الأساسي من ملف AppColors كخلفية احتياطية
       backgroundColor: AppColors.background, 
       body: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
@@ -56,18 +54,14 @@ class _LoginPageState extends State<LoginPage> {
               MaterialPageRoute(builder: (context) => const MainWrapper()),
             );
           } else if (state is AuthError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.third, // استخدام لون الـ accent للخطأ بدلاً من الأحمر العادي
-              ),
-            );
+            CustomSnackBar.show(context, message: state.message, isError: false);
+           
           }
         },
         child: Container(
           width: double.infinity,
           height: double.infinity,
-          // استخدام التدرج اللوني المعرف في AppColors
+   
           decoration: const BoxDecoration(gradient: AppColors.primaryGradient),
           child: SingleChildScrollView(
             child: Column(
@@ -95,7 +89,7 @@ class _LoginPageState extends State<LoginPage> {
                   height: MediaQuery.of(context).size.height * 0.7,
                   width: double.infinity,
                   decoration: const BoxDecoration(
-                    color: AppColors.white, // استخدام متغير white من الملف
+                    color: AppColors.white, 
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(40),
                       topRight: Radius.circular(40),
@@ -106,7 +100,7 @@ class _LoginPageState extends State<LoginPage> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        _buildInputField(
+                        CustomInputField(
                           controller: _emailController,
                           label: "Gmail",
                           hint: "name@gmail.com",
@@ -117,10 +111,10 @@ class _LoginPageState extends State<LoginPage> {
                           },
                         ),
                         const SizedBox(height: 30),
-                        _buildInputField(
+                        CustomInputField(
                           controller: _passwordController,
                           label: "Password",
-                          hint: "..........",
+                          hint: "******",
                           isPassword: true,
                           validator: (value) {
                             if (value == null || value.length < 6) return 'Password too short';
@@ -145,7 +139,7 @@ class _LoginPageState extends State<LoginPage> {
                                 width: double.infinity,
                                 height: 55,
                                 decoration: BoxDecoration(
-                                  // التدرج من الملف عند التفعيل، والرمادي الفاتح عند التعطيل
+
                                   gradient: _isButtonEnabled ? AppColors.primaryGradient : null,
                                   color: _isButtonEnabled ? null : AppColors.primary,
                                   borderRadius: BorderRadius.circular(30),
@@ -164,12 +158,13 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         const Spacer(),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
+              
+                                 mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Text("Don't have account?", style: TextStyle(color: AppColors.secondary, fontSize: 13)),
                             GestureDetector(
                               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterPage())),
-                              child: const Text("Sign up", style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 15)),
+                              child: const Text(" Sign up", style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 15)),
                             )
                           ],
                         ),
@@ -185,43 +180,5 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildInputField({
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-    bool isPassword = false,
-    Widget? suffix,
-    String? Function(String?)? validator,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // استخدام لون الـ accent للـ Label
-        Text(label, style: const TextStyle(color: AppColors.black, fontWeight: FontWeight.bold, fontSize: 16)),
-        TextFormField(
-          controller: controller,
-          obscureText: isPassword ? _isPasswordHidden : false,
-          validator: validator,
-          style: const TextStyle(color: AppColors.primary, fontSize: 14),
-          decoration: InputDecoration(
-            border: OutlineInputBorder(borderRadius:  BorderRadius.circular(12), borderSide: BorderSide.none),
-            hintText: hint,
-            hintStyle: const TextStyle(color: AppColors.black, fontSize: 13),
-            suffixIcon: isPassword
-                ? IconButton(
-                    icon: Icon(
-                      _isPasswordHidden ? Icons.visibility_off_outlined : Icons.visibility_outlined, 
-                      color: AppColors.primary, 
-                      size: 18
-                    ),
-                    onPressed: () => setState(() => _isPasswordHidden = !_isPasswordHidden),
-                  )
-                : suffix,
-            enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppColors.lightGray, width: 1)),
-            focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppColors.primary)),
-          ),
-        ),
-      ],
-    );
-  }
+  
 }
