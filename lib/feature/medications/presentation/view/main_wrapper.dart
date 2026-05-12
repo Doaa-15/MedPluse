@@ -19,14 +19,14 @@ class MainWrapper extends StatefulWidget {
 class _MainWrapperState extends State<MainWrapper> {
   int _currentIndex = 0;
 
-  // القائمة الآن أصبحت تحتوي على كلاسات مستقلة
+
   final List<Widget> _pages = [
-    const HomePage(),     // صفحة الهوم (الكود اللي فصلناه)
+    const HomePage(),     
   BlocProvider(
     create: (context) => sl<AddMedicationCubit>(),
     child: const AddMedicationPage(),
   ),  // صفحة إضافة الدواء
-    const ProfilePage(),         // صفحة البروفايل
+    const ProfilePage(),       
   ];
 
   @override

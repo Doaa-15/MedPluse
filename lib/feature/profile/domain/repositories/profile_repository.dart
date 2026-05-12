@@ -6,7 +6,6 @@ import 'package:reminder/core/errors/failures.dart';
 
 import '../entities/user_entity.dart';
 
-// هنا بنحدد "إيه" اللي المفروض يحصل، مش "إزاي"
 abstract class ProfileRepository {
 Future<Either<Failure, UserEntity>> getLoggedUser(); 
   Future<Either<Failure, void>> updateProfilePicture(File image);

@@ -28,8 +28,6 @@ class HomePage extends StatelessWidget {
         if (currentUserBox == null) {
           return const Center(child: Text("No User Found"));
         }
-
-        // --- التعديل هنا: استخدام FutureBuilder لفتح الصندوق بأمان ---
         return FutureBuilder<Box<MedicationModel>>(
           future: Hive.openBox<MedicationModel>(currentUserBox),
           builder: (context, snapshot) {
@@ -103,17 +101,7 @@ children: medications.map((m) => MedCard(med: m)).toList(),
         },
       ),
     ),
-    const SizedBox(width: 15),
-    Expanded(
-      child: HomeActionButton(
-        label: AppLocalizations.of(context)!.schedule,
-        icon: Icons.calendar_today_rounded,
-        color: AppColors.primary,
-        onTap: () {
    
-        },
-      ),
-    ),
   ],
 ),
                       ],

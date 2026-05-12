@@ -99,20 +99,18 @@ static Future<void> scheduleNotification({
     const NotificationDetails platformDetails = NotificationDetails(android: androidDetails);
 
     if (frequency == 'Interval' && intervalHours != null && intervalHours > 0) {
-      // بنحسب هيتكرر كام مرة في الـ 24 ساعة
       int occurrencesPerDay = 24 ~/ intervalHours;
       
       for (int i = 0; i < occurrencesPerDay; i++) {
         DateTime instanceTime = scheduledTime.add(Duration(hours: i * intervalHours));
         tz.TZDateTime scheduledDate = tz.TZDateTime.from(instanceTime, tz.local);
         
-        // لو الوقت فات، بنجدوله لبكرة
         if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
           scheduledDate = scheduledDate.add(const Duration(days: 1));
         }
 
         await _notificationsPlugin.zonedSchedule(
-          id + i, // بنزود i عشان كل ميعاد يكون ليه ID فريد ميمسحش اللي قبله
+          id + i, 
           'MedSync Reminder',
           'It\'s time for $medicationName ($dosage)',
           scheduledDate,

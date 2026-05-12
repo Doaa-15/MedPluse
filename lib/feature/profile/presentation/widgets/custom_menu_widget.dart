@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:reminder/core/theme/app_colors.dart'; // تأكدي من المسار
+import 'package:reminder/core/theme/app_colors.dart';
 
 class ProfileMenuItem extends StatelessWidget {
   final IconData icon;

@@ -6,7 +6,7 @@ import 'package:reminder/core/theme/app_colors.dart';
 import 'package:reminder/feature/profile/presentation/cubit/profile_cubit.dart';
 
 class ProfileHeader extends StatelessWidget {
-  final dynamic user; // استقبلنا بيانات المستخدم هنا
+  final dynamic user;
 
   const ProfileHeader({super.key, required this.user});
 
@@ -28,11 +28,9 @@ class ProfileHeader extends StatelessWidget {
           GestureDetector(
             onTap: () async {
               final ImagePicker picker = ImagePicker();
-              // اختيار الصورة من المعرض
               final XFile? image = await picker.pickImage(source: ImageSource.gallery);
               
               if (image != null && context.mounted) {
-                // استدعاء الميثود من الـ Cubit
                 context.read<ProfileCubit>().updateProfilePicture(File(image.path));
               }
             },

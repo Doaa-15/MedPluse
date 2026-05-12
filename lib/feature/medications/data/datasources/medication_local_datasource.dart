@@ -26,7 +26,7 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
     final box = await _getBox();
     // حفظ باستخدام الـ ID كمفتاح لضمان عدم التكرار وسهولة التحديث
     await box.put(medication.id, medication);
-    print(" تم الحفظ : ${medication.name}");
+    print(" save: ${medication.name}");
   }
 
   @override
@@ -41,6 +41,6 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
   Future<void> deleteMedication(String id) async {
     final box = await _getBox();
     await box.delete(id);
-    print(" تم حذف الدواء من صندوق المستخدم الحالي");
+    print(" deleted");
   }
 }

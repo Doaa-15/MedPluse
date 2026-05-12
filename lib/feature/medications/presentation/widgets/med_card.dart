@@ -59,7 +59,6 @@ class MedCard extends StatelessWidget {
       onDismissed: (direction) {
         context.read<MedicationCubit>().deleteMedication(med.id);
         ScaffoldMessenger.of(context).showSnackBar(
-          // استخدام الترجمة مع تمرير متغير (اسم الدواء)
           SnackBar(content: Text(l10n.deletedMessage(med.name))),
         );
       },

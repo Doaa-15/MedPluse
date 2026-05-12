@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:reminder/core/theme/app_colors.dart';
-import 'package:reminder/localization/cubit/local_cubit.dart'; // تأكدي من مسار الألوان
-// تأكدي من مسار الكيوبيت
+import 'package:reminder/feature/profile/presentation/widgets/language_option_widget.dart';
+import 'package:reminder/localization/cubit/local_cubit.dart'; 
+
 
 class LanguageBottomSheet extends StatelessWidget {
   const LanguageBottomSheet({super.key});
 
-  // دالة ثابتة (static) لتسهيل استدعاء الـ Bottom Sheet من أي مكان
   static void show(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -37,9 +36,7 @@ class LanguageBottomSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-
-          // خيار اللغة العربية
-          _LanguageOption(
+          LanguageOption(
             title: "العربية",
             isSelected: currentLocale == 'ar',
             onTap: () {
@@ -50,8 +47,8 @@ class LanguageBottomSheet extends StatelessWidget {
 
           const SizedBox(height: 10),
 
-          // خيار اللغة الإنجليزية
-          _LanguageOption(
+      
+          LanguageOption(
             title: "English",
             isSelected: currentLocale == 'en',
             onTap: () {
@@ -65,33 +62,3 @@ class LanguageBottomSheet extends StatelessWidget {
   }
 }
 
-class _LanguageOption extends StatelessWidget {
-  final String title;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _LanguageOption({
-    required this.title,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      onTap: onTap,
-      title: Text(
-        title,
-        style: TextStyle(
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          color: isSelected ? AppColors.primary : Colors.black87,
-        ),
-      ),
-      trailing: isSelected
-          ? const Icon(Icons.check_circle_rounded, color: AppColors.primary)
-          : null,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      tileColor: isSelected ? AppColors.primary.withOpacity(0.05) : Colors.transparent,
-    );
-  }
-}

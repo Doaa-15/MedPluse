@@ -44,7 +44,7 @@ class ProfilePage extends StatelessWidget {
                           title: AppLocalizations.of(context)!.accountSettings,
                           onTap: () {},
                         ),
-                        // مثال لزرار تبديل اللغة
+                      
                         ProfileMenuItem(
                           icon: Icons.translate_rounded,
                           title: AppLocalizations.of(context)!.language,
@@ -52,16 +52,16 @@ class ProfilePage extends StatelessWidget {
                    LanguageBottomSheet.show(context);
                           },
                         ), 
-                        ProfileMenuItem(
-                          icon: Icons.notifications_none_rounded,
-                          title: AppLocalizations.of(context)!.notifications,
-                          onTap: () {},
-                        ),
-                        ProfileMenuItem(
-                          icon: Icons.lock_outline_rounded,
-                          title: AppLocalizations.of(context)!.privacyPolicy,
-                          onTap: () {},
-                        ),
+                        // ProfileMenuItem(
+                        //   icon: Icons.notifications_none_rounded,
+                        //   title: AppLocalizations.of(context)!.notifications,
+                        //   onTap: () {},
+                        // ),
+                        // ProfileMenuItem(
+                        //   icon: Icons.lock_outline_rounded,
+                        //   title: AppLocalizations.of(context)!.privacyPolicy,
+                        //   onTap: () {},
+                        // ),
 
                         ProfileMenuItem(
                           icon: Icons.logout_rounded,

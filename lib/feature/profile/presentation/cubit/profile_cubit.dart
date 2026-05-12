@@ -23,19 +23,18 @@ Future<void> loadUserData() async {
     try {
       emit(ProfileLoading());
 
-      // التعديل هنا: استخدمي الـ profileRepository اللي جواه الميثود اللي كتبناها
+    
       final result = await profileRepository.updateProfilePicture(imageFile);
 
       result.fold(
-        (failure) => emit(ProfileError("فشل رفع الصورة: ${failure.message}")),
+        (failure) => emit(ProfileError("error in upload image  : ${failure.message}")),
         (_) {
-          // لو نجح، هو أصلاً بيحدث الـ Hive جوه الـ Repository
-          // فإحنا بس بنعمل إعادة تحميل للبيانات في الـ UI
+      
           loadUserData();
         },
       );
     } catch (e) {
-      emit(ProfileError("فشل رفع الصورة: ${e.toString()}"));
+      emit(ProfileError("error in upload image  ${e.toString()}"));
     }
   }
 }
