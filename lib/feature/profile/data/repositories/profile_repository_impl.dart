@@ -3,7 +3,6 @@ import 'package:dartz/dartz.dart';
 import 'package:hive/hive.dart';
 import 'package:reminder/core/errors/failures.dart';
 import 'package:reminder/feature/profile/data/model/user_model.dart';
-// السطر المهم جداً هنا
 import 'package:supabase_flutter/supabase_flutter.dart' as supa; 
 
 import '../../domain/repositories/profile_repository.dart';
@@ -42,21 +41,17 @@ class ProfileRepositoryImpl implements ProfileRepository {
         return const Left(CacheFailure(message: "User session not found"));
       }
 
-      // تحديد مسار واسم الصورة
       final fileName = '${currentEmail}_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final path = 'avatars/$fileName';
 
-      // الرفع باستخدام اللقب supa
       await supa.Supabase.instance.client.storage
           .from('profile_image') 
           .upload(path, image);
 
-      // جلب الرابط
       final String imageUrl = supa.Supabase.instance.client.storage
           .from('profile_image')
           .getPublicUrl(path);
 
-      // تحديث Hive
       final userData = box.get(currentEmail);
       if (userData != null) {
         userData['profileUrl'] = imageUrl;

@@ -11,9 +11,27 @@ class MedCard extends StatelessWidget {
   final MedicationModel med;
 
   const MedCard({super.key, required this.med});
+  bool _shouldShowAsTaken() {
+    if (!med.isTaken || med.lastTakenDate == null) return false;
+
+    final now = DateTime.now();
+    final lastTaken = med.lastTakenDate!;
+
+    if (med.frequency.contains('Interval')) {
+
+      int intervalHours = int.tryParse(med.frequency.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+      
+      if (intervalHours > 0) {
+  
+        return now.difference(lastTaken).inHours < intervalHours;
+      }
+    }
+
+    
+    return lastTaken.day == now.day && lastTaken.month == now.month && lastTaken.year == now.year;
+  }
 
   void _showDeleteDialog(BuildContext context) {
-    // تعريف متغير للوصول للترجمة بسهولة
     final l10n = AppLocalizations.of(context)!;
 
     showDialog(
@@ -42,6 +60,8 @@ class MedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // حساب الحالة الحالية بناءً على الوقت
+    final bool isTakenNow = _shouldShowAsTaken();
 
     return Dismissible(
       key: Key(med.id),
@@ -127,26 +147,29 @@ class MedCard extends StatelessWidget {
               children: [
                 const Spacer(),
                 TextButton(
-                  onPressed: () {
-                    NotificationService.snoozeNotification(med);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.remindIn5)),
-                    );
-                  },
+                  onPressed: isTakenNow 
+                      ? null
+                      : () {
+                          NotificationService.snoozeNotification(med);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(l10n.remindIn5)),
+                          );
+                        },
                   style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
                   child: Text(l10n.snooze,
-                      style: const TextStyle(
-                          color: Colors.grey, fontWeight: FontWeight.w500)),
+                      style: TextStyle(
+                          color: isTakenNow ? Colors.grey.shade300 : Colors.grey, 
+                          fontWeight: FontWeight.w500)),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: med.isTaken
+                  onPressed: isTakenNow
                       ? null
                       : () {
                           context.read<MedicationCubit>().markAsTaken(med);
                         },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: med.isTaken
+                    backgroundColor: isTakenNow
                         ? Colors.green.withOpacity(0.7)
                         : AppColors.primary,
                     foregroundColor: Colors.white,
@@ -154,18 +177,22 @@ class MedCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)),
-                    disabledBackgroundColor: Colors.grey.shade300,
-                    disabledForegroundColor: Colors.grey.shade600,
+                    disabledBackgroundColor: isTakenNow 
+                        ? Colors.green.withOpacity(0.5) 
+                        : Colors.grey.shade300,
+                    disabledForegroundColor: isTakenNow 
+                        ? Colors.white 
+                        : Colors.grey.shade600,
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (med.isTaken) ...[
+                      if (isTakenNow) ...[
                         const Icon(Icons.check_circle_outline, size: 18),
                         const SizedBox(width: 5),
                       ],
                       Text(
-                        med.isTaken ? l10n.done : l10n.take,
+                        isTakenNow ? l10n.done : l10n.take,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ],

@@ -3,28 +3,23 @@ import '../models/medication_model.dart';
 
 abstract class MedicationLocalDataSource {
   Future<List<MedicationModel>> getCachedMedications();
+  Future<void> updateMedication(MedicationModel medication);
   Future<void> cacheMedication(MedicationModel medication);
   Future<void> deleteMedication(String id);
 }
 
 class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
-  // 1. حذف الـ Constructor القديم وحذف تعريف medBox الثابت
   MedicationLocalDataSourceImpl();
 
-  // 2. دالة مساعدة لجلب اسم الصندوق الخاص بالمستخدم الحالي من الإعدادات
   Future<Box<MedicationModel>> _getBox() async {
     final settings = Hive.box('users_box');
-    // جلب الاسم الذي قمنا بحفظه في AuthCubit عند تسجيل الدخول
     final String boxName = settings.get('current_user_box', defaultValue: 'default_box');
-    
-    // فتح الصندوق (إذا كان مفتوحاً سيعيده فوراً، وإلا سيفتحه)
     return await Hive.openBox<MedicationModel>(boxName);
   }
 
   @override
   Future<void> cacheMedication(MedicationModel medication) async {
     final box = await _getBox();
-    // حفظ باستخدام الـ ID كمفتاح لضمان عدم التكرار وسهولة التحديث
     await box.put(medication.id, medication);
     print(" save: ${medication.name}");
   }
@@ -33,7 +28,6 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
   Future<List<MedicationModel>> getCachedMedications() async {
     final box = await _getBox();
     final results = box.values.toList();
-
     return results;
   }
 
@@ -43,4 +37,12 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
     await box.delete(id);
     print(" deleted");
   }
+
+@override
+Future<void> updateMedication(MedicationModel medication) async {
+  final settings = Hive.box('users_box');
+  final String boxName = settings.get('current_user_box', defaultValue: 'default_box');
+  final box = await Hive.openBox<MedicationModel>(boxName);
+  await box.put(medication.id, medication);
+}
 }

@@ -1,43 +1,26 @@
 import 'package:hive/hive.dart';
 import 'package:reminder/feature/medications/domain/entities/medication.dart';
-
-part 'medication_model.g.dart';
-
+    part 'medication_model.g.dart';
 @HiveType(typeId: 0)
-// التعديل هنا: خليه يورث من الـ Entity بدل HiveObject
-// الـ HiveObject مش ضروري طالما مش بتستخدمي delete() أو save() من الموديل نفسه
 class MedicationModel extends MedicationEntity { 
   @HiveField(0)
-  @override
-  final String id;
-
+  @override final String id;
   @HiveField(1)
-  @override
-  final String name;
-
+  @override final String name;
   @HiveField(2)
-  @override
-  final String dosage;
-
+  @override final String dosage;
   @HiveField(3)
-  @override
-  final String unit;
-
+  @override final String unit;
   @HiveField(4)
-  @override
-  final String frequency;
-
+  @override final String frequency;
   @HiveField(5)
-  @override
-  final int stock;
-
+  @override final int stock;
   @HiveField(6)
-  @override
-  final List<String> reminderTimes;
-
+  @override final List<String> reminderTimes;
   @HiveField(7)
-  @override
-  bool isTaken;
+  @override bool isTaken;
+  @HiveField(8) 
+  @override final DateTime? lastTakenDate; 
 
   MedicationModel({
     required this.id,
@@ -48,7 +31,8 @@ class MedicationModel extends MedicationEntity {
     required this.stock,
     required this.reminderTimes,
     this.isTaken = false,
-  }) : super( 
+    this.lastTakenDate,
+  }) : super(
           id: id,
           name: name,
           dosage: dosage,
@@ -57,9 +41,11 @@ class MedicationModel extends MedicationEntity {
           stock: stock,
           reminderTimes: reminderTimes,
           isTaken: isTaken,
+          lastTakenDate: lastTakenDate, 
         );
 
-  MedicationModel copyWith({bool? isTaken}) {
+  @override
+  MedicationModel copyWith({bool? isTaken, DateTime? lastTakenDate}) {
     return MedicationModel(
       id: id,
       name: name,
@@ -69,6 +55,20 @@ class MedicationModel extends MedicationEntity {
       stock: stock,
       reminderTimes: reminderTimes,
       isTaken: isTaken ?? this.isTaken,
+      lastTakenDate: lastTakenDate ?? this.lastTakenDate,
+    );
+  }
+  factory MedicationModel.fromEntity(MedicationEntity entity) {
+    return MedicationModel(
+      id: entity.id,
+      name: entity.name,
+      dosage: entity.dosage,
+      unit: entity.unit,
+      frequency: entity.frequency,
+      stock: entity.stock,
+      reminderTimes: entity.reminderTimes,
+      isTaken: entity.isTaken,
+      lastTakenDate: entity.lastTakenDate,
     );
   }
 }

@@ -14,7 +14,7 @@ class EmptyMedicationsState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center, // توسيط المحتوى عمودياً
+        mainAxisAlignment: MainAxisAlignment.center, 
         children: [
           const SizedBox(height: 40),
           Icon(

@@ -2,12 +2,10 @@ import 'dart:io';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:reminder/feature/profile/domain/repositories/profile_repository.dart';
-import 'profile_state.dart'; // استيراد ملف الـ State
+import 'profile_state.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
-
   final ProfileRepository profileRepository;
-
   ProfileCubit({required this.profileRepository} )
       : super(ProfileInitial());
 Future<void> loadUserData() async {
@@ -18,18 +16,14 @@ Future<void> loadUserData() async {
     );
   }
 
-  // أضيفي هذه الميثود داخل الكلاس
   Future<void> updateProfilePicture(File imageFile) async {
     try {
       emit(ProfileLoading());
-
-    
       final result = await profileRepository.updateProfilePicture(imageFile);
 
       result.fold(
         (failure) => emit(ProfileError("error in upload image  : ${failure.message}")),
         (_) {
-      
           loadUserData();
         },
       );

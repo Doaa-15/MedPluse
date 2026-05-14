@@ -39,7 +39,7 @@ class MedPulseHeader extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              // زر الإشعارات بتصميم شفاف وأنيق
+
               Container(
                 decoration: BoxDecoration(
                   color: AppColors.white.withOpacity(0.2),

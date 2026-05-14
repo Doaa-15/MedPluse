@@ -72,9 +72,12 @@ sl.registerFactory(
 
   // ----------------- 3. Repositories (Data Layer Implementation) -----------------
   
-  sl.registerLazySingleton<MedicationRepository>(
-    () => MedicationRepositoryImpl(),
-  );
+// 1. تسجيل الـ DataSources أولاً
+
+// 2. تسجيل الـ Repository وتمرير الـ DataSource له عبر sl()
+sl.registerLazySingleton<MedicationRepository>(
+  () => MedicationRepositoryImpl(localDataSource: sl()),
+);
 // Repositories
 sl.registerLazySingleton<ProfileRepository>(
   () => ProfileRepositoryImpl(),

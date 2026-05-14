@@ -86,6 +86,7 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
             if (widget.isInTabs) const SizedBox(height: 50),
 
              SectionTitle(title: AppLocalizations.of(context)!.generalInfo),
+
             CustomCardTextField(
               controller: _nameController,
               hint: AppLocalizations.of(context)!.medName,
@@ -93,6 +94,7 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
               validator: (v) => v!.isEmpty ? AppLocalizations.of(context)!.requiredField : null,
             ),
             const SizedBox(height: 15),
+
             CustomCardTextField(
               controller: _dosageController,
               hint: AppLocalizations.of(context)!.dosage,
@@ -106,7 +108,6 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
   value: _selectedUnit, 
   items: const ['Pills', 'Syrup', 'Injection', 'Drops'],
   
-
   itemBuilder: (item) {
     switch (item) {
       case 'Pills': return AppLocalizations.of(context)!.pills;
@@ -125,7 +126,7 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
   value: _selectedFrequency,
   items: const ['Daily', 'Weekly', 'Interval'],
   onChanged: (val) => setState(() => _selectedFrequency = val!),
-  // الترجمة هنا بناءً على القيمة المخزنة
+
   itemBuilder: (item) {
     final l10n = AppLocalizations.of(context)!;
     switch (item) {
@@ -137,7 +138,6 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
   },
 ),
 
-// يظهر فقط لو اختار Interval
 if (_selectedFrequency == 'Interval') ...[
   const SizedBox(height: 15),
   IntervalDropdownField(
@@ -168,6 +168,7 @@ if (_selectedFrequency == 'Interval') ...[
                       backgroundColor: AppColors.primary.withOpacity(0.1),
                       labelStyle: const TextStyle(color: AppColors.primary),
                     )),
+
                 ActionChip(
                   avatar: const Icon(Icons.add, size: 18, color: Colors.white),
                   label:  Text(AppLocalizations.of(context)!.addTime,
@@ -192,24 +193,24 @@ if (_selectedFrequency == 'Interval') ...[
                   if (_selectedTimes.isEmpty) {
                    
           CustomSnackBar.show(context,
-              message: AppLocalizations.of(context)!.addTimeError, isError: false);
+              message: AppLocalizations.of(context)!.addTimeError, isError: true);
                     return;
                   }
-
-                  final medication = MedicationModel(
-                    id: DateTime.now().millisecondsSinceEpoch.toString(),
-                    name: _nameController.text,
-                    dosage: _dosageController.text,
-                    unit: _selectedUnit,
-                    frequency: _selectedFrequency,
-                    stock: int.tryParse(_stockController.text) ?? 0,
-                    reminderTimes: _selectedTimes.map((t) {
-                      final now = DateTime.now();
-                      return DateFormat('HH:mm').format(DateTime(
-                          now.year, now.month, now.day, t.hour, t.minute));
-                    }).toList(),
-                    isTaken: false,
-                  );
+final medication = MedicationModel(
+  id: DateTime.now().millisecondsSinceEpoch.toString(),
+  name: _nameController.text,
+  dosage: _dosageController.text,
+  unit: _selectedUnit,
+  frequency: _selectedFrequency,
+  // التعديل هنا: لو اختار Interval بنخزن الساعات اللي اختارها (_selectedInterval) جوه الـ stock
+  stock: _selectedFrequency == 'Interval' ? _selectedInterval : (int.tryParse(_stockController.text) ?? 0),
+  reminderTimes: _selectedTimes.map((t) {
+    final now = DateTime.now();
+    return DateFormat('HH:mm').format(DateTime(
+        now.year, now.month, now.day, t.hour, t.minute));
+  }).toList(),
+  isTaken: false,
+);
 
          
                   final settings = Hive.box('users_box');

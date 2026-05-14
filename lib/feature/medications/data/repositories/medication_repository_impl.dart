@@ -1,19 +1,19 @@
 import 'package:hive/hive.dart';
+import 'package:reminder/core/errors/failures.dart';
+import 'package:reminder/feature/medications/data/datasources/medication_local_datasource.dart';
 import 'package:reminder/feature/medications/domain/entities/medication.dart';
 import 'package:reminder/feature/medications/domain/repositories/medication_repository.dart';
 import '../models/medication_model.dart';
 
 class MedicationRepositoryImpl implements MedicationRepository {
-  // 1. حذف الـ Constructor القديم الذي كان يطلب medBox كـ Required
-  MedicationRepositoryImpl();
+  final MedicationLocalDataSource localDataSource;
 
-  // دالة مساعدة خاصة لجلب البوكس الخاص بالمستخدم الحالي
+MedicationRepositoryImpl({required this.localDataSource});
+
   Future<Box<MedicationModel>> _getBox() async {
     final settings = Hive.box('users_box');
     final String boxName =
         settings.get('current_user_box', defaultValue: 'default_box');
-
-    // إذا كان البوكس مفتوحاً مسبقاً سيعيده فوراً، وإلا سيفتحه
     return await Hive.openBox<MedicationModel>(boxName);
   }
 
@@ -27,7 +27,6 @@ class MedicationRepositoryImpl implements MedicationRepository {
   Future<void> addMedication(MedicationEntity medication) async {
     final box = await _getBox();
 
-    // تحويل الـ Entity إلى Model ليتمكن Hive من حفظه
     final model = MedicationModel(
       id: medication.id,
       name: medication.name,
@@ -39,28 +38,36 @@ class MedicationRepositoryImpl implements MedicationRepository {
       isTaken: medication.isTaken,
     );
 
-    // الحفظ داخل البوكس الديناميكي باستخدام الـ ID كـ Key
     await box.put(model.id, model);
   }
 
   @override
 
 Future<void> updateMedicationStatus(String id, bool isTaken) async {
-  // افتحي البوكس اللي متخزن فيه الأدوية
   final settings = await Hive.openBox('users_box');
   final String boxName = settings.get('current_user_box', defaultValue: 'default_box');
   final box = await Hive.openBox<MedicationModel>(boxName);
 
   final med = box.get(id);
   if (med != null) {
-    med.isTaken = isTaken; // تحديث الحالة
-    await box.put(id, med); // حفظ التعديل
+    med.isTaken = isTaken; 
+    await box.put(id, med); 
   }
 }
   @override
   Future<void> deleteMedication(String id) async {
-  final box = await _getBox(); // جلب البوكس الديناميكي للمستخدم
-  await box.delete(id); // الحذف باستخدام الـ ID كـ Key
+  final box = await _getBox(); 
+  await box.delete(id); 
   print("Medication with id $id deleted");
+}
+
+@override
+Future<void> updateMedication(MedicationEntity medication) async {
+  try {
+    final model = MedicationModel.fromEntity(medication); 
+    await localDataSource.updateMedication(model);
+  } catch (e) {
+    throw ServerFailure(); 
+  }
 }
 }

@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:reminder/core/theme/app_colors.dart';
 import 'package:reminder/feature/add_medication/presentation/cubit/add_medicne_cubit.dart';
-
 import 'package:reminder/feature/add_medication/presentation/view/add_medicine.dart';
 import 'package:reminder/feature/medications/presentation/view/home_page.dart';
 import 'package:reminder/feature/profile/presentation/view/profile_page.dart';
 import 'package:reminder/injection_container.dart';
-// import 'package:med_reminder/feature/profile/presentation/view/profile_page.dart';
 
 class MainWrapper extends StatefulWidget {
   const MainWrapper({super.key});
@@ -25,7 +23,7 @@ class _MainWrapperState extends State<MainWrapper> {
   BlocProvider(
     create: (context) => sl<AddMedicationCubit>(),
     child: const AddMedicationPage(),
-  ),  // صفحة إضافة الدواء
+  ), 
     const ProfilePage(),       
   ];
 

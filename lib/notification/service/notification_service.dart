@@ -98,29 +98,34 @@ static Future<void> scheduleNotification({
 
     const NotificationDetails platformDetails = NotificationDetails(android: androidDetails);
 
-    if (frequency == 'Interval' && intervalHours != null && intervalHours > 0) {
-      int occurrencesPerDay = 24 ~/ intervalHours;
-      
-      for (int i = 0; i < occurrencesPerDay; i++) {
-        DateTime instanceTime = scheduledTime.add(Duration(hours: i * intervalHours));
-        tz.TZDateTime scheduledDate = tz.TZDateTime.from(instanceTime, tz.local);
-        
-        if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
-          scheduledDate = scheduledDate.add(const Duration(days: 1));
-        }
+   if (frequency == 'Interval' && intervalHours != null && intervalHours > 0) {
+  int occurrencesPerDay = 24 ~/ intervalHours;
 
-        await _notificationsPlugin.zonedSchedule(
-          id + i, 
-          'MedSync Reminder',
-          'It\'s time for $medicationName ($dosage)',
-          scheduledDate,
-          platformDetails,
-          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-          matchDateTimeComponents: DateTimeComponents.time,
-          payload: medicationId,
-        );
-      }
+  for (int i = 0; i < occurrencesPerDay; i++) {
+    // 1. حساب ميعاد الجرعة بناءً على الترتيب
+    DateTime instanceTime = scheduledTime.add(Duration(hours: i * intervalHours));
+    tz.TZDateTime scheduledDate = tz.TZDateTime.from(instanceTime, tz.local);
+
+    // 2. أهم خطوة: لو الميعاد ده عدى النهاردة، خليه يبدأ من بكرة
+    // ده بيضمن إن كل الـ slots الـ 6 (لو كل 4 ساعات) يتجدولوا صح
+    while (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
+    await _notificationsPlugin.zonedSchedule(
+      id + i, // ID فريد لكل ميعاد
+      'MedPluse Reminder',
+      'It\'s time for $medicationName ($dosage)',
+      scheduledDate,
+      platformDetails,
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      // 3. دي اللي بتخليه يكرر الميعاد ده "كل يوم"
+      matchDateTimeComponents: DateTimeComponents.time, 
+      payload: medicationId,
+    );
+  }
+
     } else {
       // الجدولة العادية (يومي أو أسبوعي أو مرة واحدة)
       await _notificationsPlugin.zonedSchedule(

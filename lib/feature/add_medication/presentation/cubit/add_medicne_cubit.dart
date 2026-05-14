@@ -11,22 +11,18 @@ class AddMedicationCubit extends Cubit<AddMedicationState> {
   AddMedicationCubit({required this.addMedicationUseCase}) : super(AddMedicationInitial());
 
 
-// داخل كلاس AddMedicationCubit
 Future<void> addMedication(MedicationModel medication, {required String boxName}) async {
   emit(AddMedicationLoading());
   try {
-    // التأكد إن الصندوق مفتوح قبل استخدامه
     Box<MedicationModel> box;
     if (Hive.isBoxOpen(boxName)) {
       box = Hive.box<MedicationModel>(boxName);
     } else {
       box = await Hive.openBox<MedicationModel>(boxName);
     }
-
-    // استخدمي put بدل add لضمان عدم التكرار
     await box.put(medication.id, medication);
     scheduleMedicationNotifications(medication);
-    
+  
     emit(AddMedicationSuccess());
   } catch (e) {
     emit(AddMedicationError("Failed to save: ${e.toString()}"));
@@ -35,10 +31,8 @@ Future<void> addMedication(MedicationModel medication, {required String boxName}
 void scheduleMedicationNotifications(MedicationModel medication) {
   final now = DateTime.now();
   for (int i = 0; i < medication.reminderTimes.length; i++) {
-    // 1. تحويل الـ String لـ DateTime
-    // بنفترض إن الفورمات "HH:mm" (ساعة:دقيقة)
-  // استبدلي الجزء رقم 1 في ميثود التحويل بهذا الكود الأكثر أماناً:
-final String timeString = medication.reminderTimes[i].replaceAll(RegExp(r'[a-zA-Z\s]'), ''); // شيل أي حروف أو مسافات (AM/PM)
+  
+final String timeString = medication.reminderTimes[i].replaceAll(RegExp(r'[a-zA-Z\s]'), ''); 
 final timeParts = timeString.split(':');
 
 // التأكد من الساعات (لو كانت PM بنزود 12 ساعة عشان نظام الـ 24 ساعة)
@@ -59,24 +53,23 @@ DateTime scheduledDate = DateTime(
   minute,
 );
 
-    // 2. لو الوقت ده عدى النهاردة، جدول لـ بكره
     if (scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
 
-    // 3. إنشاء ID فريد لكل جرعة
-    // بنجمع hashCode بتاع الـ ID مع الـ index عشان كل ميعاد يبقى له ID مختلف
+
+    
     final int notificationId = medication.id.hashCode + i;
 
-    // 4. استدعاء خدمة الإشعارات
-// 4. استدعاء خدمة الإشعارات
+
 NotificationService.scheduleNotification(
-  medicationId: medication.id, // السطر ده هو اللي ناقص وبسببه الأيرور
+  medicationId: medication.id, 
   id: notificationId,
   medicationName: medication.name,
   dosage: "${medication.dosage} ${medication.unit}",
   scheduledTime: scheduledDate,
-  frequency: medication.frequency, // 'Daily' أو 'Weekly'
+  frequency: medication.frequency, 
+  intervalHours: medication.frequency == 'Interval' ? medication.stock : null, 
 );
   }
 }

@@ -8,7 +8,7 @@ class GetMedicationsUseCase {
 
   GetMedicationsUseCase(this.repository);
 
-  // التأكد من أن نوع البيانات المرتجع هو MedicationEntity
+
   Future<List<MedicationEntity>> call() async {
     return await repository.getMedications();
   }

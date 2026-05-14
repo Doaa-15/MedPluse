@@ -25,13 +25,14 @@ class MedicationModelAdapter extends TypeAdapter<MedicationModel> {
       stock: fields[5] as int,
       reminderTimes: (fields[6] as List).cast<String>(),
       isTaken: fields[7] as bool,
+      lastTakenDate: fields[8] as DateTime?,
     );
   }
 
   @override
   void write(BinaryWriter writer, MedicationModel obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -47,7 +48,9 @@ class MedicationModelAdapter extends TypeAdapter<MedicationModel> {
       ..writeByte(6)
       ..write(obj.reminderTimes)
       ..writeByte(7)
-      ..write(obj.isTaken);
+      ..write(obj.isTaken)
+      ..writeByte(8)
+      ..write(obj.lastTakenDate);
   }
 
   @override
