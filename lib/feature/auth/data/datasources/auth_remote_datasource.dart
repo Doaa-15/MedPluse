@@ -14,14 +14,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<AuthResponse> signUp(String email, String password, String name) async {
-    // 1. إنشاء حساب في Authentication
+
     final response = await _supabaseClient.auth.signUp(
       email: email,
       password: password,
-      data: {'full_name': name}, // تخزين الاسم كـ Metadata
+      data: {'full_name': name}, 
     );
 
-    // 2. اختيارياً: يمكنك هنا إضافة البيانات لجدول 'profiles' في الـ Database
+
     return response;
   }
 
@@ -45,7 +45,6 @@ Future<String?> uploadProfileImage(File imageFile) async {
     final user = _supabaseClient.auth.currentUser;
     if (user == null) return null;
 
-    // المسار لازم يطابق الـ Policy (Bucket Name: profile_images)
     final fileName = '${user.id}/profile_${DateTime.now().millisecondsSinceEpoch}.png'; 
 
     await _supabaseClient.storage.from('profile_images').upload(

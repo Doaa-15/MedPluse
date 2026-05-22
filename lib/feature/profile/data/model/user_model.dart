@@ -2,7 +2,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:reminder/feature/profile/domain/entities/user_entity.dart';
 
 
-@HiveType(typeId: 0) // تأكدي من استخدام نفس الـ typeId الخاص بالكلاس
+@HiveType(typeId: 0) 
 class UserModel extends UserEntity {
   @override
   @HiveField(0)
@@ -13,7 +13,7 @@ class UserModel extends UserEntity {
   final String email;
 
   @override
-  @HiveField(2) // أضيفي الاندكس التالي هنا
+  @HiveField(2)
   final String? profileUrl; 
 
    UserModel({

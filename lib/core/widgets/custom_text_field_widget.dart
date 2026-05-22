@@ -64,7 +64,7 @@ class CustomInputField extends StatelessWidget {
               hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               
-              // الأيقونة لو باسوورد
+          
               suffixIcon: isPassword
                   ? IconButton(
                       icon: Icon(
@@ -78,7 +78,6 @@ class CustomInputField extends StatelessWidget {
                     )
                   : suffix,
 
-              // التصميم الخارجي للـ Input
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,

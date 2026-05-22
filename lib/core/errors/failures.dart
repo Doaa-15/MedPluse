@@ -4,7 +4,6 @@ abstract class Failure {
 }
 
 class ServerFailure extends Failure {
-  // إضافة الـ constructor لـ ServerFailure عشان يمرر الرسالة للأب
   const ServerFailure({String message = 'حدث خطأ في السيرفر'}) : super(message);
 }
 

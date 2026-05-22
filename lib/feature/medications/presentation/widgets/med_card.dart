@@ -12,25 +12,43 @@ class MedCard extends StatelessWidget {
 
   const MedCard({super.key, required this.med});
   bool _shouldShowAsTaken() {
-    if (!med.isTaken || med.lastTakenDate == null) return false;
+  if (!med.isTaken || med.lastTakenDate == null) return false;
 
-    final now = DateTime.now();
-    final lastTaken = med.lastTakenDate!;
+  final now = DateTime.now();
+  final lastTaken = med.lastTakenDate!;
 
-    if (med.frequency.contains('Interval')) {
 
-      int intervalHours = int.tryParse(med.frequency.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-      
-      if (intervalHours > 0) {
-  
-        return now.difference(lastTaken).inHours < intervalHours;
-      }
-    }
-
+  if (med.frequency.contains('Interval')) {
+    int intervalHours = int.tryParse(med.frequency.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
     
-    return lastTaken.day == now.day && lastTaken.month == now.month && lastTaken.year == now.year;
+    if (intervalHours > 0) {
+
+      final baseTime = med.reminderTimes.isNotEmpty 
+          ? _parseTimeString(med.reminderTimes.last.toString()) 
+          : now;
+
+      final int hoursSinceBase = now.difference(baseTime).inHours;
+      final int currentSlotIndex = hoursSinceBase ~/ intervalHours;
+      final currentSlotDateTime = baseTime.add(Duration(hours: currentSlotIndex * intervalHours));
+      return lastTaken.isAfter(currentSlotDateTime) || lastTaken.isAtSameMomentAs(currentSlotDateTime);
+    }
   }
 
+  return lastTaken.day == now.day && lastTaken.month == now.month && lastTaken.year == now.year;
+}
+
+DateTime _parseTimeString(String timeStr) {
+  try {
+    final now = DateTime.now();
+    final parts = timeStr.split(':');
+    if (parts.length >= 2) {
+      final hour = int.parse(parts[0].trim());
+      final minute = int.parse(parts[1].substring(0, 2).trim());
+      return DateTime(now.year, now.month, now.day, hour, minute);
+    }
+  } catch (_) {}
+  return DateTime.now();
+}
   void _showDeleteDialog(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
@@ -60,7 +78,7 @@ class MedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    // حساب الحالة الحالية بناءً على الوقت
+
     final bool isTakenNow = _shouldShowAsTaken();
 
     return Dismissible(

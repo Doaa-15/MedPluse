@@ -7,7 +7,6 @@ class CustomSnackBar {
     required String message,
     bool isError = true,
   }) {
-    // إزالة أي سناك بار موجود حالياً عشان ميتراكموش فوق بعض
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -27,21 +26,20 @@ class CustomSnackBar {
                   color: Colors.white,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  fontFamily: 'Cairo', // لو بتستخدمي خط كايرو للعربي
+                  fontFamily: 'Cairo',
                 ),
               ),
             ),
           ],
         ),
         backgroundColor: isError ? Colors.redAccent : Colors.green,
-        behavior: SnackBarBehavior.floating, // يجعله عائماً
-        elevation: 0, // بنشيل الـ elevation الافتراضي عشان نتحكم في الشكل
+        behavior: SnackBarBehavior.floating, 
+        elevation: 0, 
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
         duration: const Duration(seconds: 3),
-        // إضافة أنيميشن بسيط
         animation: CurvedAnimation(
           parent: AnimationController(
             vsync: ScaffoldMessenger.of(context),

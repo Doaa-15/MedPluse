@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
 
     return MultiBlocProvider(
       providers: [
-        // 1. إضافة الـ LocaleCubit هنا
+  
         BlocProvider(create: (context) => LocaleCubit()), 
         BlocProvider<MedicationCubit>(
           create: (context) => sl<MedicationCubit>()..fetchMedications(),
@@ -54,17 +54,15 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => sl<AuthCubit>()),
         BlocProvider(create: (context) => sl<ProfileCubit>()..loadUserData()),
       ],
-      // 2. استخدام BlocBuilder عشان نراقب تغير اللغة
+
       child: BlocBuilder<LocaleCubit, Locale>(
         builder: (context, currentLocale) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
-            // 3. الربط مع الـ Cubit
             locale: currentLocale, 
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             
-            // 4. الصفحة الرئيسية
             home: (user != null) ? const MainWrapper() : const LoginPage(),
           );
         },

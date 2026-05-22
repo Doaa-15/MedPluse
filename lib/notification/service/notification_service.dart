@@ -27,45 +27,48 @@ class NotificationService {
     );
   }
 
-  @pragma('vm:entry-point')
-  static void onNotificationTap(NotificationResponse details) async {
-    final String? actionId = details.actionId;
-    final String? medicationId = details.payload;
+ @pragma('vm:entry-point')
+static void onNotificationTap(NotificationResponse details) async {
+  final String? actionId = details.actionId;
+  final String? medicationId = details.payload;
 
-    if (medicationId == null) return;
+  if (medicationId == null) return;
 
-    // 1. تهيئة الـ Timezones والـ Hive ضروري جداً في الـ Isolate المنفصل
-    tz.initializeTimeZones();
-    await Hive.initFlutter();
-    
-    if (!Hive.isAdapterRegistered(0)) {
-      Hive.registerAdapter(MedicationModelAdapter());
-    }
 
-    // 2. فتح الـ Boxes للوصول للبيانات
-    final settings = await Hive.openBox('users_box');
-    final String boxName = settings.get('current_user_box', defaultValue: 'default_box');
-    final box = await Hive.openBox<MedicationModel>(boxName);
-
-    if (actionId == 'take_action') {
-      final med = box.get(medicationId);
-      if (med != null) {
-        med.isTaken = true; 
-        await box.put(medicationId, med);
-        print("Done: Medication marked as taken");
-      }
-    } 
-    else if (actionId == 'snooze_action') {
-      final med = box.get(medicationId);
-      if (med != null) {
-        // تنفيذ السنوز
-        await snoozeNotification(med);
-        print("Snooze: Scheduled for 5 minutes later");
-      }
-    }
+  tz.initializeTimeZones();
+  await Hive.initFlutter();
+  
+  if (!Hive.isAdapterRegistered(0)) {
+    Hive.registerAdapter(MedicationModelAdapter());
   }
 
-static Future<void> scheduleNotification({
+ 
+  final settings = await Hive.openBox('users_box');
+  final String boxName = settings.get('current_user_box', defaultValue: 'default_box');
+  final box = await Hive.openBox<MedicationModel>(boxName);
+
+  if (actionId == 'take_action') {
+    final med = box.get(medicationId);
+    if (med != null) {
+   
+    final updatedMed = med.copyWith(
+      isTaken: true,
+      lastTakenDate: DateTime.now(),
+    );
+      
+      await box.put(medicationId, updatedMed);
+      print("Done: Medication marked as taken with timestamp");
+    }
+  } 
+  else if (actionId == 'snooze_action') {
+    final med = box.get(medicationId);
+    if (med != null) {
+      // تنفيذ السنوز بـ 5 دقائق
+      await snoozeNotification(med);
+      print("Snooze: Scheduled for 5 minutes later");
+    }
+  }
+}static Future<void> scheduleNotification({
     required String medicationId,
     required int id,
     required String medicationName,
@@ -90,7 +93,7 @@ static Future<void> scheduleNotification({
         AndroidNotificationAction(
           'snooze_action',
           'Snooze',
-          showsUserInterface: false,
+          showsUserInterface: true,
           cancelNotification: true,
         ),
       ],
@@ -98,63 +101,100 @@ static Future<void> scheduleNotification({
 
     const NotificationDetails platformDetails = NotificationDetails(android: androidDetails);
 
-   if (frequency == 'Interval' && intervalHours != null && intervalHours > 0) {
-  int occurrencesPerDay = 24 ~/ intervalHours;
 
-  for (int i = 0; i < occurrencesPerDay; i++) {
-    // 1. حساب ميعاد الجرعة بناءً على الترتيب
-    DateTime instanceTime = scheduledTime.add(Duration(hours: i * intervalHours));
-    tz.TZDateTime scheduledDate = tz.TZDateTime.from(instanceTime, tz.local);
+    AndroidScheduleMode scheduleMode = AndroidScheduleMode.exactAllowWhileIdle;
 
-    // 2. أهم خطوة: لو الميعاد ده عدى النهاردة، خليه يبدأ من بكرة
-    // ده بيضمن إن كل الـ slots الـ 6 (لو كل 4 ساعات) يتجدولوا صح
-    while (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
-    }
+    if (frequency == 'Interval' && intervalHours != null && intervalHours > 0) {
+      int occurrencesPerDay = 24 ~/ intervalHours;
 
-    await _notificationsPlugin.zonedSchedule(
-      id + i, // ID فريد لكل ميعاد
-      'MedPluse Reminder',
-      'It\'s time for $medicationName ($dosage)',
-      scheduledDate,
-      platformDetails,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      // 3. دي اللي بتخليه يكرر الميعاد ده "كل يوم"
-      matchDateTimeComponents: DateTimeComponents.time, 
-      payload: medicationId,
-    );
-  }
+      for (int i = 0; i < occurrencesPerDay; i++) {
+        DateTime instanceTime = scheduledTime.add(Duration(hours: i * intervalHours));
+        tz.TZDateTime scheduledDate = tz.TZDateTime.from(instanceTime, tz.local);
 
+        while (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
+          scheduledDate = scheduledDate.add(const Duration(days: 1));
+        }
+
+        try {
+          await _notificationsPlugin.zonedSchedule(
+            id + i,
+            'MedPluse Reminder',
+            'It\'s time for $medicationName ($dosage)',
+            scheduledDate,
+            platformDetails,
+            uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+            androidScheduleMode: scheduleMode,
+            matchDateTimeComponents: DateTimeComponents.time, 
+            payload: medicationId,
+          );
+        } catch (e) {
+
+          print("Switching to standard exact mode due to permission constraints");
+          await _notificationsPlugin.zonedSchedule(
+            id + i,
+            'MedPluse Reminder',
+            'It\'s time for $medicationName ($dosage)',
+            scheduledDate,
+            platformDetails,
+            uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+            androidScheduleMode: AndroidScheduleMode.exact,
+            matchDateTimeComponents: DateTimeComponents.time, 
+            payload: medicationId,
+          );
+        }
+      }
     } else {
-      // الجدولة العادية (يومي أو أسبوعي أو مرة واحدة)
-      await _notificationsPlugin.zonedSchedule(
-        id,
-        'MedPluse Reminder',
-        'It\'s time for $medicationName ($dosage)',
-        tz.TZDateTime.from(scheduledTime, tz.local),
-        platformDetails,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        matchDateTimeComponents: frequency == 'Daily'
-            ? DateTimeComponents.time
-            : (frequency == 'Weekly' ? DateTimeComponents.dayOfWeekAndTime : null),
-        payload: medicationId,
-      );
+      tz.TZDateTime scheduledDate = tz.TZDateTime.from(scheduledTime, tz.local);
+      
+      if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
+        scheduledDate = tz.TZDateTime.now(tz.local).add(const Duration(minutes: 5));
+      }
+
+      try {
+        await _notificationsPlugin.zonedSchedule(
+          id,
+          'MedPluse Reminder',
+          'It\'s time for $medicationName ($dosage)',
+          scheduledDate,
+          platformDetails,
+          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+          androidScheduleMode: scheduleMode,
+          matchDateTimeComponents: frequency == 'Daily'
+              ? DateTimeComponents.time
+              : (frequency == 'Weekly' ? DateTimeComponents.dayOfWeekAndTime : null),
+          payload: medicationId,
+        );
+      } catch (e) {
+   
+        await _notificationsPlugin.zonedSchedule(
+          id,
+          'MedPluse Reminder',
+          'It\'s time for $medicationName ($dosage)',
+          scheduledDate,
+          platformDetails,
+          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+          androidScheduleMode: AndroidScheduleMode.exact,
+          matchDateTimeComponents: frequency == 'Daily'
+              ? DateTimeComponents.time
+              : (frequency == 'Weekly' ? DateTimeComponents.dayOfWeekAndTime : null),
+          payload: medicationId,
+        );
+      }
     }
   }
+   
   static Future<void> snoozeNotification(MedicationModel medication) async {
-    // تحديد وقت الغفوة (5 دقائق من الآن)
+   
     final nextTime = DateTime.now().add(const Duration(minutes: 5));
     
-    // التأكد من تهيئة الوقت قبل الجدولة (احتياطاً للـ Isolate)
+    
     tz.initializeTimeZones();
     final String timeZoneName = await FlutterTimezone.getLocalTimezone();
     tz.setLocalLocation(tz.getLocation(timeZoneName));
 
     await scheduleNotification(
       medicationId: medication.id,
-      id: (medication.id.hashCode + DateTime.now().millisecond).abs(), // ID مختلف عشان ميمسحش القديم
+      id: (medication.id.hashCode + DateTime.now().millisecond).abs(),
       medicationName: medication.name,
       dosage: medication.dosage,
       scheduledTime: nextTime,
@@ -162,20 +202,30 @@ static Future<void> scheduleNotification({
     );
   }
 
-  static Future<void> requestPermissions() async {
-    await _notificationsPlugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestNotificationsPermission();
-    await _notificationsPlugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestExactAlarmsPermission();
-  }
-  // داخل كلاس NotificationService
-static Future<void> cancelNotification(int id) async {
-    // 1. مسح الـ ID الأساسي
-    await _notificationsPlugin.cancel(id);
+static Future<void> requestPermissions() async {
+  try {
+
+    final androidNotificationPlugin = _notificationsPlugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+        
+    if (androidNotificationPlugin != null) {
+      await androidNotificationPlugin.requestNotificationsPermission();
+    }
+
     
-    // 2. مسح أي احتمالات لـ IDs تانية لو كان الدواء Interval
+    if (androidNotificationPlugin != null) {
+      await androidNotificationPlugin.requestExactAlarmsPermission();
+    }
+    
+    print("Permissions requested successfully sequentially.");
+  } catch (e) {
+    print("Error while requesting permissions: $e");
+  }
+}
+
+static Future<void> cancelNotification(int id) async {
+
+    await _notificationsPlugin.cancel(id);
     for (int i = 1; i <= 24; i++) {
       await _notificationsPlugin.cancel(id + i);
     }

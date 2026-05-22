@@ -202,7 +202,7 @@ final medication = MedicationModel(
   dosage: _dosageController.text,
   unit: _selectedUnit,
   frequency: _selectedFrequency,
-  // التعديل هنا: لو اختار Interval بنخزن الساعات اللي اختارها (_selectedInterval) جوه الـ stock
+
   stock: _selectedFrequency == 'Interval' ? _selectedInterval : (int.tryParse(_stockController.text) ?? 0),
   reminderTimes: _selectedTimes.map((t) {
     final now = DateTime.now();

@@ -35,7 +35,7 @@ void scheduleMedicationNotifications(MedicationModel medication) {
 final String timeString = medication.reminderTimes[i].replaceAll(RegExp(r'[a-zA-Z\s]'), ''); 
 final timeParts = timeString.split(':');
 
-// التأكد من الساعات (لو كانت PM بنزود 12 ساعة عشان نظام الـ 24 ساعة)
+
 int hour = int.parse(timeParts[0]);
 int minute = int.parse(timeParts[1]);
 

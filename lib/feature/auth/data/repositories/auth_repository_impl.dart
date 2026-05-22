@@ -15,14 +15,14 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, void>> login(String email, String password) async {
     try {
-      // 1. محاولة الدخول أونلاين (Remote)
+
       final userResponse = await remoteDataSource.signIn(email, password);
 
       if (userResponse.user != null) {
-        // تحديث البيانات المحلية لضمان وجود اليوزر أوفلاين المرة الجاية
+      
         await localDataSource.registerUser(
           userResponse.user!.email!,
-          password, // حفظنا الباسورد هنا عشان الـ Offline Login يشتغل صح بعدين
+          password, 
           userResponse.user!.userMetadata?['full_name'] ?? 'User',
         );
         return const Right(null);
@@ -32,7 +32,7 @@ class AuthRepositoryImpl implements AuthRepository {
         );
       }
     } catch (e) {
-      // 2. هندلة أخطاء السيرفر (مثل: الحساب مش موجود أو الباسورد غلط)
+
       final errorMessage = e.toString().toLowerCase();
 
       if (errorMessage.contains('invalid login credentials') ||
@@ -45,17 +45,15 @@ class AuthRepositoryImpl implements AuthRepository {
         );
       }
 
-      // 3. محاولة الدخول أوفلاين (لو المشكلة في النت مثلاً)
       try {
         final success = await localDataSource.loginUser(email, password);
         if (success) {
           return const Right(null);
         } else {
-          // لو الداتا موجودة بس الباسورد اللي دخل غلط أوفلاين
+   
           return const Left(CacheFailure(message: "Invalid offline credentials"));
         }
       } catch (cacheError) {
-        // لو الإيميل أصلاً مش موجود في Hive
         return const Left(
           CacheFailure(
             message:

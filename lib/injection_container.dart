@@ -54,7 +54,7 @@ Future<void> init() async {
         () => AuthCubit(
       loginUseCase: sl(),
       registerUseCase: sl(),
-      authRepository: sl(), // هنا GetIt هيدور على AuthRepository اللي إنتِ مسجلاه فوق
+      authRepository: sl(), 
     ),
   );
 
@@ -72,7 +72,7 @@ sl.registerFactory(
 
   // ----------------- 3. Repositories (Data Layer Implementation) -----------------
   
-// 1. تسجيل الـ DataSources أولاً
+
 
 // 2. تسجيل الـ Repository وتمرير الـ DataSource له عبر sl()
 sl.registerLazySingleton<MedicationRepository>(
@@ -106,7 +106,4 @@ sl.registerLazySingleton<AuthRemoteDataSource>(
     () => MedicationLocalDataSourceImpl(),
   );
 
-  // ----------------- 5. External Libraries (Optional) -----------------
-  // إذا كنتِ تحتاجين لتسجيل SupabaseClient كإعتماد خارجي
-  // sl.registerLazySingleton(() => Supabase.instance.client);
 }
